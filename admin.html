@@ -44,9 +44,11 @@
   .cell .dnum{font-size:.72rem;font-weight:700;color:#4A154B}
   .cell.today .dnum{background:#D4AF37;color:#2a0b2c;border-radius:9999px;width:1.3rem;height:1.3rem;display:flex;align-items:center;justify-content:center}
   .slot{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;border-radius:3px;padding:.15rem .3rem;text-align:center;border:1px solid transparent}
-  .slot.open{background:rgba(212,175,55,.16);color:#8a6d16}
-  .slot.resv{background:#efe2f0;color:#8a4f90}
-  .slot.can{cursor:pointer} .slot.can:hover{outline:1px solid #D4AF37}
+  .slot.open{background:#16a34a;color:#fff}       /* available */
+  .slot.booked{background:#2563eb;color:#fff}     /* pending booking */
+  .slot.reserved{background:#d97706;color:#fff}   /* reserved by admin */
+  .slot.confirmed{background:#be123c;color:#fff}  /* confirmed booking */
+  .slot.can{cursor:pointer} .slot.can:hover{outline:2px solid #1d0820;outline-offset:1px}
   .hidden{display:none}
 </style>
 </head>
@@ -147,10 +149,12 @@
             </div>
           </div>
           <div id="calGrid"></div>
-          <div class="flex flex-wrap gap-x-5 gap-y-1 mt-4 text-xs text-charcoal/70">
-            <span class="flex items-center gap-1.5"><span class="slot open px-2">D</span> Daytime 8:00am–4:00pm</span>
-            <span class="flex items-center gap-1.5"><span class="slot open px-2">E</span> Evening 4:30pm–12:00am</span>
-            <span class="flex items-center gap-1.5"><span class="slot resv px-2">■</span> Reserved</span>
+          <div class="flex flex-wrap gap-x-4 gap-y-2 mt-4 text-xs text-charcoal/70 items-center">
+            <span class="text-charcoal/55">D = Daytime 8–4 · E = Evening 4:30–12</span>
+            <span class="flex items-center gap-1.5"><span class="slot open px-2">■</span> Open</span>
+            <span class="flex items-center gap-1.5"><span class="slot booked px-2">■</span> Booked</span>
+            <span class="flex items-center gap-1.5"><span class="slot reserved px-2">■</span> Reserved</span>
+            <span class="flex items-center gap-1.5"><span class="slot confirmed px-2">■</span> Confirmed</span>
             <span id="calHint" class="text-charcoal/50"></span>
           </div>
         </div>
@@ -279,6 +283,7 @@ async function loadRole(){ try{ const r=await api('/rpc/my_role',{method:'POST',
 /* ======================= Data ops ======================= */
 const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 async function reservedInRange(startStr,endStr){ const r=await api(`/availability?event_date=gte.${startStr}&event_date=lte.${endStr}&select=event_date,session`); if(!r.ok) return new Set(); return new Set((await r.json()).map(x=>x.event_date+'|'+x.session)); }
+async function bookingsInRange(startStr,endStr){ const r=await api(`/bookings?event_date=gte.${startStr}&event_date=lte.${endStr}&status=in.(pending,confirmed)&select=event_date,session,status,name`); const map=new Map(); if(r.ok){ (await r.json()).forEach(b=>{ const k=b.event_date+'|'+b.session; const cur=map.get(k); if(!cur||b.status==='confirmed') map.set(k,{status:b.status,name:b.name}); }); } return map; }
 async function reserveSlot(dateStr,session){ const r=await api('/availability',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal,resolution=ignore-duplicates'},body:JSON.stringify({event_date:dateStr,session})}); return r.ok||r.status===409; }
 async function openSlot(dateStr,session){ const r=await api(`/availability?event_date=eq.${dateStr}&session=eq.${session}`,{method:'DELETE',headers:{Prefer:'return=minimal'}}); return r.ok; }
 async function listBookings(filter){ let q='/bookings?select=*&order=created_at.desc'; if(filter) q+=`&status=eq.${filter}`; const r=await api(q); return r.ok?await r.json():[]; }
@@ -346,6 +351,7 @@ async function renderCalendar(){
   grid.innerHTML = '<div class="cal mb-1">'+['Su','Mo','Tu','We','Th','Fr','Sa'].map(x=>`<div class="dow">${x}</div>`).join('')+'</div><div class="cal" id="calBody"></div>';
   const body=$('calBody');
   const reserved = await reservedInRange(ymd(start), ymd(end));
+  const bookMap  = await bookingsInRange(ymd(start), ymd(end));
   cells.forEach(d=>{
     const cell=document.createElement('div');
     if(!d){ cell.className='cell dim'; body.appendChild(cell); return; }
@@ -353,12 +359,18 @@ async function renderCalendar(){
     cell.className='cell'+(isPast?' past':'')+(isToday?' today':'');
     cell.innerHTML = `<div class="dnum">${d.getDate()}</div>`;
     SESSIONS.forEach(s=>{
-      const key=ymd(d)+'|'+s.key, resv=reserved.has(key);
+      const key=ymd(d)+'|'+s.key, resv=reserved.has(key), bk=bookMap.get(key);
+      let state='open';
+      if (bk && bk.status==='confirmed') state='confirmed';
+      else if (bk && bk.status==='pending') state='booked';
+      else if (resv) state='reserved';
+      const canToggle = canSessions() && !isPast && (state==='open' || state==='reserved');
       const el=document.createElement('div');
-      el.className='slot '+(resv?'resv':'open')+((canSessions()&&!isPast)?' can':'');
-      el.textContent = s.short+(resv?' ✕':'');
-      el.title = `${s.name} — ${resv?'Reserved':'Open'}`;
-      if(canSessions() && !isPast){
+      el.className='slot '+state+(canToggle?' can':'');
+      el.textContent = s.short;
+      const label = state==='confirmed'?'Confirmed':state==='booked'?'Booked (pending)':state==='reserved'?'Reserved':'Open';
+      el.title = `${s.name} — ${label}${bk&&bk.name?' · '+bk.name:''}`;
+      if(canToggle){
         el.addEventListener('click', async ()=>{
           el.style.opacity=.5;
           const ok = resv ? await openSlot(ymd(d),s.key) : await reserveSlot(ymd(d),s.key);
