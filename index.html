@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Status Building Event Center — at Sierra Leone Grammar School</title>
+<meta name="description" content="Status Building Event Center — an elegant event hall at the Sierra Leone Grammar School compound, Murray Town, Freetown, by the Aberdeen Bridge. Seats 350, parks 200. Now open for weddings, corporate events, seminars and private celebrations. Check availability and request your date." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          regal:   { DEFAULT: '#4A154B', deep: '#360f38', dark: '#2a0b2c', ink: '#1d0820' },
+          gold:    { DEFAULT: '#D4AF37', soft: '#e3c868', deep: '#b8912a', pale: '#f0e3b8' },
+          charcoal:'#2B2B2B',
+          mist:    '#F4F4F4',
+          tint:    '#F7F4F8',
+          cream:   '#FBF9F4',
+        },
+        fontFamily: {
+          serif: ['Merriweather', 'Georgia', 'serif'],
+          sans:  ['"Open Sans"', 'system-ui', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  :root { --ease: cubic-bezier(.2,.7,.2,1); }
+
+  html { scroll-behavior: smooth; }
+  body { background: #FBF9F4; color: #2B2B2B; font-family: 'Open Sans', sans-serif; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+
+  h1,h2,h3,h4 { font-family: 'Merriweather', serif; }
+
+  ::selection { background: #4A154B; color: #fff; }
+
+  /* ---- Elegant brand devices ---- */
+  .kicker {
+    font-family: 'Open Sans', sans-serif;
+    font-size: .72rem; font-weight: 600;
+    letter-spacing: .32em; text-transform: uppercase;
+    color: #b8912a;
+  }
+  .rule-gold { height: 1px; background: linear-gradient(90deg, transparent, #D4AF37 20%, #D4AF37 80%, transparent); }
+  .hair { border-color: rgba(212,175,55,.35); }
+
+  .display { letter-spacing: -0.02em; line-height: 1.02; }
+  .lead { font-size: clamp(1.05rem, 1.6vw, 1.22rem); line-height: 1.75; }
+
+  /* ---- Layered, purple-tinted shadows ---- */
+  .shadow-elev   { box-shadow: 0 2px 6px rgba(74,21,75,.06), 0 14px 34px rgba(74,21,75,.12); }
+  .shadow-float  { box-shadow: 0 10px 26px rgba(74,21,75,.16), 0 30px 70px rgba(42,11,44,.24); }
+  .shadow-gold   { box-shadow: 0 8px 24px rgba(212,175,55,.32); }
+
+  /* ---- Grain for depth ---- */
+  .grain::after {
+    content:""; position:absolute; inset:0; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---- Hero crafted backdrop (grand-hall, gold light) ---- */
+  .hero-bg {
+    background:
+      radial-gradient(120% 90% at 50% -10%, rgba(212,175,55,.26), transparent 48%),
+      radial-gradient(80% 60% at 85% 20%, rgba(212,175,55,.10), transparent 60%),
+      radial-gradient(90% 70% at 15% 85%, rgba(120,40,130,.45), transparent 60%),
+      linear-gradient(185deg, #4A154B 0%, #360f38 46%, #2a0b2c 100%);
+  }
+  /* faint hall arcade motif */
+  .hero-arches {
+    position:absolute; inset:0; opacity:.10; pointer-events:none;
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0 86px, rgba(212,175,55,.5) 86px 87px, transparent 87px 174px);
+    mask-image: linear-gradient(to bottom, transparent 8%, #000 42%, #000 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 8%, #000 42%, #000 70%, transparent 100%);
+  }
+  .hero-glow {
+    position:absolute; left:50%; top:30%; width:min(760px,90vw); aspect-ratio:1; transform:translate(-50%,-50%);
+    background: radial-gradient(circle, rgba(212,175,55,.22), transparent 62%); pointer-events:none; filter:blur(10px);
+  }
+
+  /* ---- Seal (crest in a gold-ringed disc so purple logo reads on dark) ---- */
+  .seal { background: #FBF9F4; border-radius:9999px; box-shadow: 0 0 0 1px rgba(212,175,55,.9), 0 0 0 6px rgba(212,175,55,.18), 0 10px 30px rgba(0,0,0,.35); }
+
+  /* ---- Buttons ---- */
+  .btn { display:inline-flex; align-items:center; gap:.55rem; font-weight:600; border-radius:2px; transition: transform .25s var(--ease), box-shadow .25s var(--ease), background-color .25s var(--ease), color .25s var(--ease); }
+  .btn:active { transform: translateY(1px) scale(.995); }
+  .btn-gold { background:#D4AF37; color:#2a0b2c; padding:.95rem 1.7rem; box-shadow:0 8px 24px rgba(212,175,55,.32); }
+  .btn-gold:hover { background:#e3c868; box-shadow:0 12px 30px rgba(212,175,55,.42); transform:translateY(-2px); }
+  .btn-gold:focus-visible { outline:3px solid #fff; outline-offset:3px; }
+  .btn-ghost { background:transparent; color:#FBF9F4; padding:.95rem 1.7rem; box-shadow: inset 0 0 0 1px rgba(240,227,184,.55); }
+  .btn-ghost:hover { box-shadow: inset 0 0 0 1px #D4AF37; background:rgba(212,175,55,.10); transform:translateY(-2px); }
+  .btn-ghost:focus-visible { outline:3px solid #D4AF37; outline-offset:3px; }
+  .btn-purple { background:#4A154B; color:#fff; padding:.95rem 1.7rem; box-shadow:0 10px 26px rgba(74,21,75,.26); }
+  .btn-purple:hover { background:#360f38; transform:translateY(-2px); box-shadow:0 14px 32px rgba(74,21,75,.34); }
+  .btn-purple:focus-visible { outline:3px solid #D4AF37; outline-offset:3px; }
+  .btn-cal { background:#fff; color:#4A154B; padding:.95rem 1.7rem; box-shadow: inset 0 0 0 1px rgba(74,21,75,.35); }
+  .btn-cal:hover { box-shadow: inset 0 0 0 1px #4A154B; background:#faf6fb; transform:translateY(-2px); }
+  .btn-cal:focus-visible { outline:3px solid #4A154B; outline-offset:3px; }
+
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline:3px solid #D4AF37; outline-offset:2px; }
+
+  /* ---- Nav ---- */
+  #nav { transition: background-color .4s var(--ease), box-shadow .4s var(--ease), border-color .4s var(--ease); }
+  #nav.scrolled { background: rgba(251,249,244,.92); backdrop-filter: blur(10px); box-shadow: 0 1px 0 rgba(212,175,55,.35), 0 8px 30px rgba(74,21,75,.08); }
+  #nav.scrolled .nav-link { color:#2B2B2B; }
+  #nav.scrolled .nav-word { color:#4A154B; }
+  #nav.scrolled .nav-sub { color:#b8912a; }
+  .nav-link { position:relative; color:#f0e3b8; font-weight:500; font-size:.92rem; letter-spacing:.01em; }
+  .nav-link::after { content:""; position:absolute; left:0; bottom:-6px; height:1px; width:0; background:#D4AF37; transition:width .3s var(--ease); }
+  .nav-link:hover::after, .nav-link:focus-visible::after { width:100%; }
+
+  /* ---- Occasion cards ---- */
+  .occasion { position:relative; overflow:hidden; border-radius:4px; }
+  .occasion img { transition: transform .7s var(--ease); display:block; width:100%; height:100%; object-fit:cover; }
+  .occasion:hover img { transform: scale(1.06); }
+  .occasion .wash { position:absolute; inset:0; background:linear-gradient(to top, rgba(29,8,32,.92) 4%, rgba(42,11,44,.35) 46%, rgba(42,11,44,0) 72%); }
+  .occasion .tone { position:absolute; inset:0; background:#4A154B; mix-blend-mode:multiply; opacity:.28; transition:opacity .5s var(--ease); }
+  .occasion:hover .tone { opacity:.14; }
+
+  /* ---- Gallery ---- */
+  .gal { position:relative; overflow:hidden; border-radius:3px; }
+  .gal img { display:block; width:100%; height:100%; object-fit:cover; transition:transform .7s var(--ease); }
+  .gal:hover img { transform:scale(1.05); }
+  .gal .tone { position:absolute; inset:0; background:#4A154B; mix-blend-mode:multiply; opacity:.22; }
+
+  /* ---- Availability / calendar ---- */
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+  .dow { text-align:center; font-size:.68rem; font-weight:700; letter-spacing:.14em; color:#9b7fa0; padding-bottom:.3rem; }
+  .day { position:relative; aspect-ratio:1; border-radius:3px; border:1px solid transparent; background:#fff; color:#2B2B2B; font-weight:600; font-size:.9rem;
+         display:flex; align-items:center; justify-content:center; cursor:pointer; transition: background-color .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease); }
+  .day:hover:not(.is-dim):not(.is-past) { border-color:#D4AF37; transform:translateY(-1px); }
+  .day.is-past, .day.is-dim { color:#cbb9cd; cursor:default; background:transparent; }
+  .day.is-full { background:#f3eef4; color:#b199b4; }
+  .day.is-full::after, .day.is-some::after { content:""; position:absolute; bottom:6px; left:50%; transform:translateX(-50%); width:5px; height:5px; border-radius:50%; }
+  .day.is-some::after { background:#D4AF37; }
+  .day.is-full::after { background:#c59bc8; }
+  .day.is-selected { background:#4A154B; color:#fff; border-color:#4A154B; box-shadow:0 8px 20px rgba(74,21,75,.3); }
+  .day.is-selected::after { background:#D4AF37; }
+
+  .session { border:1px solid rgba(74,21,75,.14); border-radius:3px; padding:.9rem 1rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; transition:border-color .2s var(--ease), background-color .2s var(--ease); background:#fff; }
+  .session.avail { cursor:pointer; }
+  .session.avail:hover { border-color:#D4AF37; background:#fffdf6; }
+  .session.sel { border-color:#4A154B; background:#faf6fb; box-shadow:inset 0 0 0 1px #4A154B; }
+  .session.taken { opacity:.6; }
+  .pill { font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:.2rem .55rem; border-radius:2px; }
+  .pill-ok { background:rgba(212,175,55,.16); color:#8a6d16; }
+  .pill-no { background:#f1e6f2; color:#9b6fa0; }
+
+  .field label { font-size:.78rem; font-weight:600; letter-spacing:.04em; color:#4A154B; margin-bottom:.3rem; display:block; }
+  .field input, .field select { width:100%; padding:.7rem .8rem; border:1px solid rgba(74,21,75,.2); border-radius:3px; background:#fff; color:#2B2B2B; font-size:.95rem; transition:border-color .2s var(--ease), box-shadow .2s var(--ease); }
+  .field input:focus, .field select:focus { border-color:#D4AF37; box-shadow:0 0 0 3px rgba(212,175,55,.18); outline:none; }
+
+  .reveal { opacity:1; transform:none; }
+  .js .reveal { opacity:0; transform: translateY(18px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
+  .js .reveal.in { opacity:1; transform:none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior:auto; }
+    .reveal { opacity:1 !important; transform:none !important; transition:none; }
+    .occasion img, .gal img { transition:none; }
+    * { animation:none !important; }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- ===================== NAV ===================== -->
+<header id="nav" class="fixed top-0 inset-x-0 z-50">
+  <nav class="max-w-7xl mx-auto px-5 sm:px-8 h-20 flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-3 group">
+      <span class="seal w-11 h-11 flex items-center justify-center shrink-0">
+        <img src="brand_assets/slgs-logo-png.png" alt="Sierra Leone Grammar School crest" class="w-8 h-8 object-contain" />
+      </span>
+      <span class="leading-none">
+        <span class="nav-word block font-serif font-700 text-[.98rem] sm:text-[1.02rem] tracking-tight text-cream leading-tight">Status Building Event Center</span>
+        <span class="nav-sub block text-[.6rem] tracking-[.26em] uppercase text-gold-pale/90 mt-1">at Sierra Leone Grammar School</span>
+      </span>
+    </a>
+
+    <div class="hidden lg:flex items-center gap-9">
+      <a href="#elegance" class="nav-link">The Hall</a>
+      <a href="#occasions" class="nav-link">Occasions</a>
+      <a href="#booking" class="nav-link">Availability</a>
+      <a href="#gallery" class="nav-link">Gallery</a>
+      <a href="#visit" class="nav-link">Visit</a>
+    </div>
+
+    <a href="#booking" class="btn btn-gold !py-2.5 !px-5 text-sm hidden sm:inline-flex">Check availability</a>
+
+    <button id="menuBtn" class="lg:hidden text-cream p-2" aria-label="Open menu" aria-expanded="false">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </nav>
+
+  <div id="mobileMenu" class="lg:hidden hidden bg-regal-dark/97 backdrop-blur border-t hair">
+    <div class="px-6 py-5 flex flex-col gap-4 text-cream">
+      <a href="#elegance" class="mob-link py-1 border-b border-white/5">The Hall</a>
+      <a href="#occasions" class="mob-link py-1 border-b border-white/5">Occasions</a>
+      <a href="#booking" class="mob-link py-1 border-b border-white/5">Availability</a>
+      <a href="#gallery" class="mob-link py-1 border-b border-white/5">Gallery</a>
+      <a href="#visit" class="mob-link py-1 border-b border-white/5">Visit</a>
+      <a href="#booking" class="btn btn-gold mt-2 justify-center">Check availability</a>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section id="top" class="hero-bg grain relative min-h-screen flex items-center overflow-hidden">
+  <div class="hero-arches"></div>
+  <div class="hero-glow"></div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 w-full pt-28 pb-20 text-center">
+    <div class="reveal flex flex-col items-center">
+      <span class="seal w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center mb-8">
+        <img src="brand_assets/slgs-logo-png.png" alt="Sierra Leone Grammar School crest" class="w-16 h-16 sm:w-20 sm:h-20 object-contain" />
+      </span>
+
+      <p class="kicker !text-gold-pale mb-6">Now open to the public &nbsp;·&nbsp; Est. grounds since 1845</p>
+
+      <h1 class="display text-cream font-700 text-[2.5rem] leading-[1.04] sm:text-6xl lg:text-7xl max-w-4xl">
+        Status Building Event Center
+      </h1>
+      <p class="font-serif italic text-gold-soft text-xl sm:text-2xl mt-5">Where every occasion becomes a milestone.</p>
+
+      <p class="lead text-cream/80 max-w-2xl mt-7">
+        An elegant event hall within the historic Sierra Leone Grammar School compound — built
+        for weddings, galas, conferences and celebrations worth remembering. Seats 350 guests,
+        parks 200 vehicles.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center gap-4 mt-10">
+        <a href="#booking" class="btn btn-gold w-full sm:w-auto justify-center">Check availability</a>
+        <a href="#gallery" class="btn btn-ghost w-full sm:w-auto justify-center">Take a look inside</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- bottom fade into page -->
+  <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-cream z-10"></div>
+
+  <!-- bottom edge handled by fade above; stats band sits just below (outside hero to avoid clipping) -->
+</section>
+
+<!-- ===================== FACTS STRIP (overlaps hero bottom, fully visible) ===================== -->
+<div class="relative z-30 -mt-16 sm:-mt-20 px-5">
+  <div class="max-w-4xl mx-auto bg-regal-ink shadow-float rounded-sm border-t-2 border-gold grid grid-cols-3 divide-x divide-white/15 overflow-hidden">
+    <div class="px-3 sm:px-6 py-6 sm:py-7 text-center">
+      <div class="font-serif text-gold text-3xl sm:text-4xl font-700 leading-none">350</div>
+      <div class="text-cream/90 text-[.62rem] sm:text-[.72rem] font-600 tracking-[.14em] sm:tracking-[.18em] uppercase mt-2">Seated guests</div>
+    </div>
+    <div class="px-3 sm:px-6 py-6 sm:py-7 text-center">
+      <div class="font-serif text-gold text-3xl sm:text-4xl font-700 leading-none">200</div>
+      <div class="text-cream/90 text-[.62rem] sm:text-[.72rem] font-600 tracking-[.14em] sm:tracking-[.18em] uppercase mt-2">Parking spaces</div>
+    </div>
+    <div class="px-3 sm:px-6 py-6 sm:py-7 text-center">
+      <div class="font-serif text-gold text-3xl sm:text-4xl font-700 leading-none">1845</div>
+      <div class="text-cream/90 text-[.62rem] sm:text-[.72rem] font-600 tracking-[.14em] sm:tracking-[.18em] uppercase mt-2">Heritage grounds</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ELEGANCE / INTRO ===================== -->
+<section id="elegance" class="relative pt-20 pb-24 sm:pt-24 sm:pb-28">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+      <div class="reveal">
+        <p class="kicker mb-5">A space designed for elegance</p>
+        <h2 class="display text-regal text-3xl sm:text-4xl lg:text-[2.9rem] font-700 max-w-xl">
+          A landmark address for the moments that matter
+        </h2>
+        <div class="rule-gold w-20 my-7"></div>
+        <p class="lead text-charcoal/85 max-w-xl">
+          Status Building Event Center brings a rare sense of occasion to Freetown. High ceilings, warm
+          light and a graceful layout make it as fitting for a wedding reception as for a
+          board-level conference. Our events team helps you shape the room around your day —
+          from an intimate ceremony to a full banquet of 350.
+        </p>
+        <p class="text-charcoal/75 mt-5 max-w-xl">
+          Set within the gated Sierra Leone Grammar School compound, the hall offers generous
+          on-site parking, room to breathe, and the quiet reassurance of a well-kept, secure venue.
+        </p>
+
+        <ul class="mt-9 grid sm:grid-cols-2 gap-x-8 gap-y-4 max-w-xl">
+          <li class="flex items-start gap-3"><span class="text-gold mt-1">◆</span><span class="text-charcoal/80"><strong class="text-regal font-600">Flexible layouts</strong> — banquet, theatre, boardroom or lounge.</span></li>
+          <li class="flex items-start gap-3"><span class="text-gold mt-1">◆</span><span class="text-charcoal/80"><strong class="text-regal font-600">On-site parking</strong> for up to 200 vehicles.</span></li>
+          <li class="flex items-start gap-3"><span class="text-gold mt-1">◆</span><span class="text-charcoal/80"><strong class="text-regal font-600">Secure, gated grounds</strong> with managed access.</span></li>
+          <li class="flex items-start gap-3"><span class="text-gold mt-1">◆</span><span class="text-charcoal/80"><strong class="text-regal font-600">Open vendor list</strong> — bring your own caterer and décor.</span></li>
+        </ul>
+      </div>
+
+      <div class="reveal relative">
+        <div class="relative grain shadow-float rounded-sm overflow-hidden">
+          <img src="https://placehold.co/900x1100/4A154B/D4AF37?text=Grand+Hall" alt="Status Building Event Center hall interior" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-regal mix-blend-multiply opacity-20"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-regal-dark/75 via-transparent to-transparent"></div>
+          <div class="absolute left-7 top-7 right-7 text-cream">
+            <p class="font-serif italic text-gold-soft text-lg">"Built to impress, kept with care."</p>
+          </div>
+        </div>
+        <!-- floating accent card -->
+        <div class="absolute -left-4 -bottom-6 sm:-left-8 bg-cream shadow-elev rounded-sm px-6 py-5 border-t-2 border-gold max-w-[15rem]">
+          <div class="text-regal font-serif font-700 text-2xl">5 event types</div>
+          <p class="text-charcoal/70 text-sm mt-1">One hall, dressed for weddings, business and celebration alike.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== OCCASIONS ===================== -->
+<section id="occasions" class="relative py-24 sm:py-28 bg-regal grain overflow-hidden">
+  <div class="hero-glow !top-0 !opacity-60"></div>
+  <div class="relative max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="reveal max-w-2xl mb-14">
+      <p class="kicker !text-gold mb-5">Made for every kind of gathering</p>
+      <h2 class="display text-cream text-3xl sm:text-4xl lg:text-5xl font-700">
+        One hall, dressed for the occasion
+      </h2>
+      <div class="rule-gold w-20 mt-7"></div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- large feature -->
+      <article class="occasion group sm:col-span-2 lg:row-span-2 min-h-[22rem] lg:min-h-full">
+        <img src="https://placehold.co/900x1100/360f38/D4AF37?text=Weddings" alt="A wedding reception set in the hall" />
+        <div class="tone"></div><div class="wash"></div>
+        <div class="absolute inset-x-0 bottom-0 p-7">
+          <h3 class="font-serif text-cream text-3xl font-700">Weddings &amp; receptions</h3>
+          <p class="text-cream/85 mt-2 max-w-md">Say your vows and dance the night away beneath a hall built for once-in-a-lifetime moments.</p>
+        </div>
+      </article>
+
+      <article class="occasion group min-h-[15rem]">
+        <img src="https://placehold.co/700x600/4A154B/D4AF37?text=Corporate" alt="A corporate conference in progress" />
+        <div class="tone"></div><div class="wash"></div>
+        <div class="absolute inset-x-0 bottom-0 p-6">
+          <h3 class="font-serif text-cream text-xl font-700">Corporate &amp; conferences</h3>
+          <p class="text-cream/80 text-sm mt-1.5">AGMs, launches and award nights with room to impress.</p>
+        </div>
+      </article>
+
+      <article class="occasion group min-h-[15rem]">
+        <img src="https://placehold.co/700x600/2a0b2c/D4AF37?text=Celebrations" alt="A private celebration" />
+        <div class="tone"></div><div class="wash"></div>
+        <div class="absolute inset-x-0 bottom-0 p-6">
+          <h3 class="font-serif text-cream text-xl font-700">Private celebrations</h3>
+          <p class="text-cream/80 text-sm mt-1.5">Birthdays, anniversaries and homecomings, hosted in style.</p>
+        </div>
+      </article>
+
+      <article class="occasion group min-h-[15rem]">
+        <img src="https://placehold.co/700x600/4A154B/e3c868?text=Seminars" alt="A seminar with delegates seated" />
+        <div class="tone"></div><div class="wash"></div>
+        <div class="absolute inset-x-0 bottom-0 p-6">
+          <h3 class="font-serif text-cream text-xl font-700">Seminars &amp; workshops</h3>
+          <p class="text-cream/80 text-sm mt-1.5">Keynotes and training days for up to 350 delegates.</p>
+        </div>
+      </article>
+
+      <article class="occasion group min-h-[15rem]">
+        <img src="https://placehold.co/700x600/360f38/e3c868?text=Banquets" alt="A gala dinner set with round tables" />
+        <div class="tone"></div><div class="wash"></div>
+        <div class="absolute inset-x-0 bottom-0 p-6">
+          <h3 class="font-serif text-cream text-xl font-700">Galas &amp; banquets</h3>
+          <p class="text-cream/80 text-sm mt-1.5">Formal dinners and fundraisers served in full elegance.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== AVAILABILITY / BOOKING ===================== -->
+<section id="booking" class="relative py-24 sm:py-28">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="reveal max-w-2xl mb-12">
+      <p class="kicker mb-5">Check availability &amp; request your date</p>
+      <h2 class="display text-regal text-3xl sm:text-4xl lg:text-5xl font-700">Find your date</h2>
+      <div class="rule-gold w-20 mt-7"></div>
+      <p class="lead text-charcoal/80 mt-6 max-w-xl">
+        Pick a date to see which sessions are open, choose a time, and send your request.
+        Our events team confirms every booking within one working day.
+      </p>
+    </div>
+
+    <div class="bg-white shadow-float rounded-sm overflow-hidden border hair grid lg:grid-cols-2">
+      <!-- Calendar -->
+      <div class="p-6 sm:p-9 border-b lg:border-b-0 lg:border-r hair">
+        <div class="flex items-center justify-between mb-6">
+          <button id="prevMonth" class="w-10 h-10 rounded-sm border hair text-regal hover:bg-tint transition-colors flex items-center justify-center" aria-label="Previous month">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div id="monthLabel" class="font-serif text-regal text-xl font-700"></div>
+          <button id="nextMonth" class="w-10 h-10 rounded-sm border hair text-regal hover:bg-tint transition-colors flex items-center justify-center" aria-label="Next month">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="cal-grid mb-2" id="dowRow"></div>
+        <div class="cal-grid" id="calDays"></div>
+
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 mt-6 text-xs text-charcoal/70">
+          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-gold inline-block"></span>Some sessions open</span>
+          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:#c59bc8"></span>Fully booked</span>
+          <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-regal inline-block"></span>Selected</span>
+        </div>
+      </div>
+
+      <!-- Sessions + form -->
+      <div class="p-6 sm:p-9 bg-tint/40">
+        <div id="sessionArea">
+          <div id="noDate" class="h-full flex flex-col items-center justify-center text-center py-8">
+            <span class="seal w-14 h-14 flex items-center justify-center mb-4" style="box-shadow:0 0 0 1px rgba(74,21,75,.15), 0 0 0 5px rgba(74,21,75,.05)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A154B" stroke-width="1.5"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+            </span>
+            <p class="text-charcoal/70 max-w-xs">Select a date on the calendar to see which sessions are open.</p>
+            <div class="mt-7 w-full max-w-xs text-left">
+              <p class="kicker mb-3">Two sessions daily</p>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-sm border-b hair pb-2"><span class="font-serif text-regal">Daytime</span><span class="text-charcoal/55">8:00am – 4:00pm</span></div>
+                <div class="flex items-center justify-between text-sm"><span class="font-serif text-regal">Evening</span><span class="text-charcoal/55">4:30pm – 12:00am</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="sessionPick" class="hidden">
+            <p class="kicker mb-2">Sessions on</p>
+            <h3 id="selDateLabel" class="font-serif text-regal text-2xl font-700 mb-5"></h3>
+            <div class="space-y-3" id="sessionList"></div>
+          </div>
+        </div>
+
+        <!-- Booking form -->
+        <form id="bookingForm" class="hidden mt-8 pt-7 border-t hair">
+          <p class="kicker mb-4">Step 3 — Your details</p>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="field"><label for="fName">Full name</label><input id="fName" name="name" type="text" required placeholder="e.g. Aminata Koroma" /></div>
+            <div class="field"><label for="fEmail">Email</label><input id="fEmail" name="email" type="email" required placeholder="you@example.com" /></div>
+            <div class="field"><label for="fPhone">Phone</label><input id="fPhone" name="phone" type="tel" required placeholder="+232 ..." /></div>
+            <div class="field">
+              <label for="fType">Event type</label>
+              <select id="fType" name="type" required>
+                <option value="" disabled selected>Choose one</option>
+                <option>Wedding / reception</option>
+                <option>Corporate / conference</option>
+                <option>Private celebration</option>
+                <option>Seminar / workshop</option>
+                <option>Gala / banquet</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field sm:col-span-2"><label for="fGuests">Expected guests</label><input id="fGuests" name="guests" type="number" min="1" max="350" placeholder="Up to 350" /></div>
+          </div>
+          <p id="formError" class="hidden text-sm text-red-700 bg-red-50 border border-red-200 rounded-sm px-3 py-2 mt-4"></p>
+          <button id="submitBtn" type="submit" class="btn btn-purple w-full justify-center mt-6">Request this date</button>
+          <p class="text-xs text-charcoal/55 mt-3 text-center">No payment now — we hold your enquiry and confirm within one working day.</p>
+        </form>
+
+        <!-- Confirmation -->
+        <div id="confirm" class="hidden text-center py-6">
+          <span class="seal w-16 h-16 flex items-center justify-center mx-auto mb-5" style="box-shadow:0 0 0 1px rgba(212,175,55,.9), 0 0 0 6px rgba(212,175,55,.18)">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4A154B" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg>
+          </span>
+          <h3 class="font-serif text-regal text-2xl font-700">Request received</h3>
+          <p class="text-charcoal/80 mt-3 max-w-sm mx-auto" id="confirmMsg"></p>
+
+          <div class="mt-7 pt-6 border-t hair max-w-sm mx-auto">
+            <p class="kicker mb-3">Hold the date in your calendar</p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+              <a id="gcalLink" href="#" target="_blank" rel="noopener" class="btn btn-purple !py-2.5 !px-5 text-sm justify-center">Add to Google Calendar</a>
+              <a id="icsLink" href="#" download="status-building-booking.ics" class="btn btn-cal !py-2.5 !px-5 text-sm justify-center">Download invite (.ics)</a>
+            </div>
+          </div>
+
+          <button id="newBooking" class="btn btn-gold mt-7 justify-center">Check another date</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== GALLERY ===================== -->
+<section id="gallery" class="py-24 sm:py-28 bg-tint/50">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="reveal flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-12">
+      <div class="max-w-xl">
+        <p class="kicker mb-5">A look inside</p>
+        <h2 class="display text-regal text-3xl sm:text-4xl lg:text-5xl font-700">The hall, set and ready</h2>
+        <div class="rule-gold w-20 mt-7"></div>
+      </div>
+      <a href="#visit" class="btn btn-purple self-start sm:self-auto">Book a private tour</a>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 reveal">
+      <div class="gal col-span-2 row-span-2 min-h-[16rem]"><img src="https://placehold.co/800x800/4A154B/D4AF37?text=Main+Hall" alt="The main hall set for an event" /><div class="tone"></div></div>
+      <div class="gal min-h-[12rem]"><img src="https://placehold.co/500x500/360f38/e3c868?text=Banquet" alt="Banquet seating" /><div class="tone"></div></div>
+      <div class="gal min-h-[12rem]"><img src="https://placehold.co/500x500/2a0b2c/D4AF37?text=Stage" alt="Stage and lighting" /><div class="tone"></div></div>
+      <div class="gal min-h-[12rem]"><img src="https://placehold.co/500x500/4A154B/e3c868?text=Entrance" alt="Grand entrance" /><div class="tone"></div></div>
+      <div class="gal min-h-[12rem]"><img src="https://placehold.co/500x500/360f38/D4AF37?text=Grounds" alt="Grounds and parking" /><div class="tone"></div></div>
+    </div>
+    <p class="text-xs text-charcoal/50 mt-5">Imagery shown is placeholder — your real photographs of Status Building Event Center drop straight in.</p>
+  </div>
+</section>
+
+<!-- ===================== VISIT / LOCATION ===================== -->
+<section id="visit" class="py-24 sm:py-28">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-stretch">
+      <div class="reveal">
+        <p class="kicker mb-5">Plan your visit</p>
+        <h2 class="display text-regal text-3xl sm:text-4xl lg:text-[2.8rem] font-700 max-w-md">Come and see the space for yourself</h2>
+        <div class="rule-gold w-20 my-7"></div>
+        <p class="lead text-charcoal/80 max-w-md">
+          Arrange a walkthrough with our events team, talk through your day, and reserve your date.
+          We're glad to show you around.
+        </p>
+
+        <dl class="mt-9 space-y-6 max-w-md">
+          <div class="flex items-start gap-4">
+            <span class="text-gold text-xl mt-0.5">◆</span>
+            <div><dt class="font-serif text-regal font-700">Location</dt>
+            <dd class="text-charcoal/80">Status Building Event Center, Sierra Leone Grammar School compound, Murray Town, Freetown — at the mouth of the Aberdeen Bridge.</dd>
+            <dd class="mt-1.5"><a href="https://www.openstreetmap.org/?mlat=8.493829&amp;mlon=-13.2673#map=16/8.493829/-13.2673" target="_blank" rel="noopener" class="text-sm text-charcoal/60 underline decoration-gold/50 underline-offset-4 hover:text-regal">8.493829, -13.2673</a></dd></div>
+          </div>
+          <div class="flex items-start gap-4">
+            <span class="text-gold text-xl mt-0.5">◆</span>
+            <div><dt class="font-serif text-regal font-700">Bookings &amp; enquiries</dt>
+            <dd class="text-charcoal/80"><a href="mailto:events@slgs.sl" class="underline decoration-gold/50 underline-offset-4 hover:text-regal">events@slgs.sl</a> &nbsp;·&nbsp; <a href="tel:+23200000000" class="underline decoration-gold/50 underline-offset-4 hover:text-regal">+232 00 000 000</a></dd></div>
+          </div>
+          <div class="flex items-start gap-4">
+            <span class="text-gold text-xl mt-0.5">◆</span>
+            <div><dt class="font-serif text-regal font-700">Viewing hours</dt>
+            <dd class="text-charcoal/80">Monday–Friday, 9:00am – 2:00pm. Weekend viewings by appointment.</dd></div>
+          </div>
+        </dl>
+
+        <div class="flex flex-wrap gap-4 mt-9">
+          <a href="#booking" class="btn btn-gold">Check availability</a>
+          <a href="mailto:events@slgs.sl" class="btn btn-purple">Email the team</a>
+        </div>
+      </div>
+
+      <!-- live map embed -->
+      <div class="reveal relative rounded-sm overflow-hidden shadow-float border hair bg-regal flex flex-col min-h-[24rem] lg:min-h-full">
+        <iframe
+          title="Map to Status Building Event Center, Murray Town, Freetown"
+          src="https://www.openstreetmap.org/export/embed.html?bbox=-13.2793%2C8.485829%2C-13.2553%2C8.501829&amp;layer=mapnik&amp;marker=8.493829%2C-13.2673"
+          class="w-full flex-1 min-h-[18rem]" style="border:0;"
+          loading="lazy" allowfullscreen></iframe>
+        <div class="flex items-center justify-between gap-3 bg-regal-ink px-5 py-3.5">
+          <div class="min-w-0">
+            <p class="font-serif text-cream text-sm font-700 truncate">Status Building Event Center</p>
+            <p class="text-gold-pale/80 text-xs mt-0.5 truncate">Murray Town, Freetown · 8.493829, -13.2673</p>
+          </div>
+          <a href="https://www.openstreetmap.org/?mlat=8.493829&amp;mlon=-13.2673#map=16/8.493829/-13.2673" target="_blank" rel="noopener" class="btn btn-ghost !py-2 !px-4 text-xs shrink-0">Open map</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="bg-regal-dark grain relative text-cream/80">
+  <div class="relative max-w-7xl mx-auto px-5 sm:px-8 py-16">
+    <div class="grid md:grid-cols-[1.4fr_1fr_1fr] gap-10">
+      <div>
+        <div class="flex items-center gap-3 mb-5">
+          <span class="seal w-12 h-12 flex items-center justify-center"><img src="brand_assets/slgs-logo-png.png" alt="Sierra Leone Grammar School crest" class="w-9 h-9 object-contain" /></span>
+          <div class="leading-tight">
+            <span class="block font-serif text-cream font-700">Status Building Event Center</span>
+            <span class="block text-[.62rem] tracking-[.26em] uppercase text-gold-pale/80 mt-1">Sierra Leone Grammar School</span>
+          </div>
+        </div>
+        <p class="max-w-xs text-sm text-cream/65">An elegant event hall on heritage grounds — open to the public for the occasions that matter most.</p>
+        <p class="font-serif italic text-gold-soft mt-5">Building Excellence — since 1845.</p>
+      </div>
+
+      <div>
+        <h4 class="text-cream font-600 text-sm tracking-wide mb-4">Explore</h4>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="#elegance" class="hover:text-gold transition-colors">The Hall</a></li>
+          <li><a href="#occasions" class="hover:text-gold transition-colors">Occasions</a></li>
+          <li><a href="#booking" class="hover:text-gold transition-colors">Availability</a></li>
+          <li><a href="#gallery" class="hover:text-gold transition-colors">Gallery</a></li>
+          <li><a href="#visit" class="hover:text-gold transition-colors">Visit</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-cream font-600 text-sm tracking-wide mb-4">Get in touch</h4>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="mailto:events@slgs.sl" class="hover:text-gold transition-colors">events@slgs.sl</a></li>
+          <li><a href="tel:+23200000000" class="hover:text-gold transition-colors">+232 00 000 000</a></li>
+          <li class="text-cream/60">Murray Town, Freetown, Sierra Leone</li>
+          <li class="text-cream/60">Viewings: Mon–Fri · 9am–2pm</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rule-gold w-full my-10 opacity-60"></div>
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-cream/55">
+      <p>© <span id="year"></span> Status Building Event Center · Sierra Leone Grammar School. All rights reserved.</p>
+      <p>Seats 350 · Parks 200 · Freetown, Sierra Leone</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Enable reveal animations only when JS runs (content stays visible without it). */
+document.documentElement.classList.add('js');
+
+/* ============================================================================
+   BOOKING CONFIG  — change these two lines, nothing else.
+   BOOKING_EMAIL : the inbox that should receive enquiries. Enquiries are sent
+                   via FormSubmit (https://formsubmit.co) — no server needed.
+                   First time: submit the form once with the real address, then
+                   click the activation link FormSubmit emails you. After that,
+                   every enquiry lands in that inbox automatically.
+   ============================================================================ */
+const BOOKING_EMAIL   = 'events@slgs.sl'; // ← replace with your real inbox
+const VENUE_NAME      = 'Status Building Event Center';
+const VENUE_LOCATION  = 'Status Building Event Center, Sierra Leone Grammar School compound, Murray Town, Freetown, Sierra Leone';
+const VENUE_GEO       = '8.493829;-13.2673'; // lat;lon for the .ics GEO field
+
+/* ---------- Nav scroll + mobile menu ---------- */
+const nav = document.getElementById('nav');
+const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 40);
+onScroll(); window.addEventListener('scroll', onScroll, { passive: true });
+
+const menuBtn = document.getElementById('menuBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+menuBtn.addEventListener('click', () => {
+  const open = mobileMenu.classList.toggle('hidden') === false;
+  menuBtn.setAttribute('aria-expanded', String(open));
+});
+document.querySelectorAll('.mob-link').forEach(l => l.addEventListener('click', () => {
+  mobileMenu.classList.add('hidden'); menuBtn.setAttribute('aria-expanded','false');
+}));
+
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ---------- Reveal on scroll ---------- */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+// hero in immediately
+requestAnimationFrame(() => document.querySelector('#top .reveal')?.classList.add('in'));
+
+/* ---------- Availability calendar ---------- */
+const SESSIONS = [
+  { key:'daytime', name:'Daytime', time:'8:00am – 4:00pm',  start:[8,0],   end:[16,0] },
+  { key:'evening', name:'Evening', time:'4:30pm – 12:00am', start:[16,30], end:[24,0] }, // 24:00 rolls to midnight
+];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DOW = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+const today = new Date(); today.setHours(0,0,0,0);
+let viewY = today.getFullYear();
+let viewM = today.getMonth();
+let selected = null; // Date
+let chosenSession = null;
+
+// deterministic availability so the demo is stable
+function statusFor(d, i){
+  const seed = (d.getFullYear()*372 + (d.getMonth()+1)*31 + d.getDate())*3 + i*7;
+  return (Math.abs(Math.sin(seed)) > 0.66) ? 'taken' : 'avail';
+}
+function dayState(d){
+  if (d < today) return 'past';
+  const states = SESSIONS.map((_,i)=>statusFor(d,i));
+  if (states.every(s => s==='taken')) return 'full';
+  if (states.some(s => s==='taken')) return 'some';
+  return 'open';
+}
+
+const dowRow = document.getElementById('dowRow');
+DOW.forEach(d => { const el=document.createElement('div'); el.className='dow'; el.textContent=d; dowRow.appendChild(el); });
+
+const calDays = document.getElementById('calDays');
+const monthLabel = document.getElementById('monthLabel');
+
+function sameDay(a,b){ return a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
+
+function renderCalendar(){
+  calDays.innerHTML = '';
+  monthLabel.textContent = `${MONTHS[viewM]} ${viewY}`;
+  const first = new Date(viewY, viewM, 1);
+  const startDow = first.getDay();
+  const daysInMonth = new Date(viewY, viewM+1, 0).getDate();
+
+  for (let i=0;i<startDow;i++){ const b=document.createElement('div'); b.className='day is-dim'; calDays.appendChild(b); }
+
+  for (let dte=1; dte<=daysInMonth; dte++){
+    const d = new Date(viewY, viewM, dte);
+    const cell = document.createElement('button');
+    cell.type='button'; cell.className='day'; cell.textContent=dte;
+    const st = dayState(d);
+    if (st==='past'){ cell.classList.add('is-past'); cell.disabled=true; cell.setAttribute('aria-disabled','true'); }
+    else if (st==='full'){ cell.classList.add('is-full'); cell.setAttribute('aria-label', `${MONTHS[viewM]} ${dte} — fully booked`); }
+    else if (st==='some'){ cell.classList.add('is-some'); }
+    if (sameDay(d, selected)) cell.classList.add('is-selected');
+
+    if (st!=='past'){
+      cell.addEventListener('click', () => { selected = d; chosenSession=null; renderCalendar(); renderSessions(); });
+    }
+    calDays.appendChild(cell);
+  }
+}
+
+const sessionPick = document.getElementById('sessionPick');
+const noDate = document.getElementById('noDate');
+const sessionList = document.getElementById('sessionList');
+const selDateLabel = document.getElementById('selDateLabel');
+const bookingForm = document.getElementById('bookingForm');
+const confirmBox = document.getElementById('confirm');
+
+function fmtDate(d){ return `${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; }
+
+function renderSessions(){
+  confirmBox.classList.add('hidden');
+  noDate.classList.add('hidden');
+  sessionPick.classList.remove('hidden');
+  selDateLabel.textContent = fmtDate(selected);
+  sessionList.innerHTML = '';
+  let anyOpen = false;
+
+  SESSIONS.forEach((s,i) => {
+    const taken = statusFor(selected,i)==='taken';
+    if(!taken) anyOpen = true;
+    const row = document.createElement(taken ? 'div' : 'button');
+    if(!taken) row.type='button';
+    row.className = 'session w-full text-left ' + (taken ? 'taken' : 'avail');
+    row.innerHTML = `
+      <span>
+        <span class="block font-serif text-regal font-700">${s.name}</span>
+        <span class="block text-sm text-charcoal/65">${s.time}</span>
+      </span>
+      <span class="pill ${taken ? 'pill-no' : 'pill-ok'}">${taken ? 'Reserved' : 'Available'}</span>`;
+    if(!taken){
+      row.addEventListener('click', () => {
+        chosenSession = s;
+        [...sessionList.children].forEach(c => c.classList.remove('sel'));
+        row.classList.add('sel');
+        bookingForm.classList.remove('hidden');
+        bookingForm.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      });
+    }
+    sessionList.appendChild(row);
+  });
+
+  bookingForm.classList.add('hidden');
+  if(!anyOpen){
+    const note = document.createElement('p');
+    note.className='text-sm text-charcoal/65 mt-4';
+    note.textContent = 'This date is fully booked — please choose another, or contact us about the waitlist.';
+    sessionList.appendChild(note);
+  }
+}
+
+document.getElementById('prevMonth').addEventListener('click', () => {
+  const cur = new Date(viewY, viewM, 1), now = new Date(today.getFullYear(), today.getMonth(), 1);
+  if (cur <= now) return; // don't page into the past
+  viewM--; if (viewM<0){ viewM=11; viewY--; } renderCalendar();
+});
+document.getElementById('nextMonth').addEventListener('click', () => {
+  viewM++; if (viewM>11){ viewM=0; viewY++; } renderCalendar();
+});
+
+/* ---------- Form references ---------- */
+const fName=document.getElementById('fName'), fEmail=document.getElementById('fEmail'),
+      fPhone=document.getElementById('fPhone'), fType=document.getElementById('fType'),
+      fGuests=document.getElementById('fGuests'), submitBtn=document.getElementById('submitBtn'),
+      formError=document.getElementById('formError'), confirmMsg=document.getElementById('confirmMsg'),
+      gcalLink=document.getElementById('gcalLink'), icsLink=document.getElementById('icsLink');
+
+/* ---------- Calendar invite helpers ---------- */
+const pad = n => String(n).padStart(2,'0');
+function sessionDates(){
+  const [sh,sm]=chosenSession.start, [eh,em]=chosenSession.end;
+  const y=selected.getFullYear(), m=selected.getMonth(), d=selected.getDate();
+  return { start:new Date(y,m,d,sh,sm), end:new Date(y,m,d,eh,em) }; // end hour 24 rolls to next-day 00:00
+}
+const calStamp = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+function eventTitle(){ return `${chosenSession.name} event — ${VENUE_NAME} (tentative)`; }
+function eventDetails(){ return `Tentative booking enquiry for the ${chosenSession.name.toLowerCase()} session (${chosenSession.time}) at ${VENUE_NAME}. Awaiting confirmation from the events team.`; }
+function googleCalUrl(){
+  const {start,end}=sessionDates();
+  const q = new URLSearchParams({
+    action:'TEMPLATE', text:eventTitle(), details:eventDetails(),
+    location:VENUE_LOCATION, dates:`${calStamp(start)}/${calStamp(end)}`, ctz:'Africa/Freetown',
+  });
+  return `https://calendar.google.com/calendar/render?${q.toString()}`;
+}
+function icsUrl(){
+  const {start,end}=sessionDates();
+  const esc = s => String(s).replace(/([,;\\])/g,'\\$1');
+  const ics = [
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Status Building Event Center//Booking//EN','CALSCALE:GREGORIAN',
+    'BEGIN:VEVENT',`UID:${Date.now()}@status-building-event-center`,`DTSTAMP:${calStamp(new Date())}`,
+    `DTSTART:${calStamp(start)}`,`DTEND:${calStamp(end)}`,
+    `SUMMARY:${esc(eventTitle())}`,`DESCRIPTION:${esc(eventDetails())}`,`LOCATION:${esc(VENUE_LOCATION)}`,
+    `GEO:${VENUE_GEO}`,'STATUS:TENTATIVE','END:VEVENT','END:VCALENDAR',
+  ].join('\r\n');
+  return URL.createObjectURL(new Blob([ics], { type:'text/calendar;charset=utf-8' }));
+}
+function mailtoFallback(data){
+  const subject = `Booking enquiry — ${fmtDate(selected)} · ${chosenSession.name}`;
+  const body = Object.entries(data).map(([k,v])=>`${k}: ${v}`).join('\n');
+  return `mailto:${BOOKING_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+let lastIcsUrl = null;
+function showConfirmation(name){
+  confirmMsg.textContent =
+    `Thank you${name?`, ${name}`:''}. We've received your request for the ${chosenSession.name.toLowerCase()} session (${chosenSession.time}) on ${fmtDate(selected)}. Our events team will email you to confirm within one working day.`;
+  gcalLink.href = googleCalUrl();
+  if (lastIcsUrl) URL.revokeObjectURL(lastIcsUrl);
+  lastIcsUrl = icsUrl();
+  icsLink.href = lastIcsUrl;
+  sessionPick.classList.add('hidden');
+  bookingForm.classList.add('hidden');
+  confirmBox.classList.remove('hidden');
+}
+
+bookingForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if(!chosenSession || !selected) return;
+  const data = {
+    Name: fName.value.trim(),
+    Email: fEmail.value.trim(),
+    Phone: fPhone.value.trim(),
+    'Event type': fType.value,
+    'Expected guests': fGuests.value.trim() || 'Not specified',
+    'Requested date': fmtDate(selected),
+    Session: `${chosenSession.name} (${chosenSession.time})`,
+    Venue: VENUE_NAME,
+  };
+  formError.classList.add('hidden');
+  const original = submitBtn.textContent;
+  submitBtn.disabled = true; submitBtn.textContent = 'Sending…';
+  try {
+    const res = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(BOOKING_EMAIL), {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Accept':'application/json' },
+      body: JSON.stringify({
+        _subject: `Booking enquiry — ${data['Requested date']} · ${chosenSession.name} · ${VENUE_NAME}`,
+        _template: 'table',
+        _captcha: 'false',
+        ...data,
+      }),
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    showConfirmation(data.Name);
+  } catch (err) {
+    formError.innerHTML = `We couldn't send your request just now. Please try again, or email us directly at <a class="underline font-600" href="${mailtoFallback(data)}">${BOOKING_EMAIL}</a>.`;
+    formError.classList.remove('hidden');
+  } finally {
+    submitBtn.disabled = false; submitBtn.textContent = original;
+  }
+});
+
+document.getElementById('newBooking').addEventListener('click', () => {
+  selected=null; chosenSession=null; bookingForm.reset();
+  formError.classList.add('hidden');
+  confirmBox.classList.add('hidden'); sessionPick.classList.add('hidden');
+  noDate.classList.remove('hidden'); renderCalendar();
+  document.getElementById('booking').scrollIntoView({ behavior:'smooth', block:'start' });
+});
+
+renderCalendar();
+</script>
+</body>
+</html>
