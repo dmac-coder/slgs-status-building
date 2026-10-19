@@ -19,49 +19,73 @@
   body{background:#FBF9F4;color:#2B2B2B;font-family:'Open Sans',sans-serif}
   h1,h2,h3{font-family:'Merriweather',serif}
   .card{background:#fff;border:1px solid rgba(74,21,75,.12);border-radius:4px;box-shadow:0 2px 6px rgba(74,21,75,.06),0 14px 34px rgba(74,21,75,.08)}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;font-weight:600;border-radius:3px;transition:background-color .2s,transform .15s,box-shadow .2s;cursor:pointer}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;font-weight:600;border-radius:3px;transition:background-color .2s,transform .15s;cursor:pointer}
   .btn:active{transform:translateY(1px)}
-  .btn-gold{background:#D4AF37;color:#2a0b2c;padding:.6rem 1.1rem}
-  .btn-gold:hover{background:#e3c868}
-  .btn-purple{background:#4A154B;color:#fff;padding:.6rem 1.1rem}
-  .btn-purple:hover{background:#360f38}
-  .btn-ghost{background:#fff;color:#4A154B;padding:.5rem .9rem;box-shadow:inset 0 0 0 1px rgba(74,21,75,.3)}
-  .btn-ghost:hover{background:#faf6fb}
+  .btn-gold{background:#D4AF37;color:#2a0b2c;padding:.55rem 1rem} .btn-gold:hover{background:#e3c868}
+  .btn-purple{background:#4A154B;color:#fff;padding:.55rem 1rem} .btn-purple:hover{background:#360f38}
+  .btn-ghost{background:#fff;color:#4A154B;padding:.5rem .85rem;box-shadow:inset 0 0 0 1px rgba(74,21,75,.3)} .btn-ghost:hover{background:#faf6fb}
   .btn[disabled]{opacity:.5;cursor:default}
-  input,select{width:100%;padding:.6rem .7rem;border:1px solid rgba(74,21,75,.2);border-radius:3px;font-size:.95rem;background:#fff}
+  input,select{width:100%;padding:.55rem .65rem;border:1px solid rgba(74,21,75,.2);border-radius:3px;font-size:.92rem;background:#fff}
   input:focus,select:focus{outline:none;border-color:#D4AF37;box-shadow:0 0 0 3px rgba(212,175,55,.18)}
-  label{font-size:.78rem;font-weight:600;color:#4A154B;margin-bottom:.25rem;display:block}
-  .pill{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .55rem;border-radius:2px}
-  .pill-open{background:rgba(212,175,55,.16);color:#8a6d16}
-  .pill-reserved{background:#f1e6f2;color:#9b6fa0}
-  .pill-pending{background:#eef;color:#4457b8}
-  .pill-confirmed{background:#e7f6ec;color:#1c7a43}
-  .pill-declined{background:#fdeaea;color:#b4433a}
+  label{font-size:.75rem;font-weight:600;color:#4A154B;margin-bottom:.2rem;display:block}
+  .pill{font-size:.64rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.15rem .5rem;border-radius:2px;white-space:nowrap}
+  .pill-open{background:rgba(212,175,55,.18);color:#8a6d16}
+  .pill-reserved{background:#efe2f0;color:#8a4f90}
+  .pill-pending{background:#eef;color:#4457b8} .pill-confirmed{background:#e7f6ec;color:#1c7a43} .pill-declined{background:#fdeaea;color:#b4433a}
+  .pill-unpaid{background:#f3f0f4;color:#8a7d8e} .pill-part{background:#fff3d6;color:#9a6b00} .pill-full{background:#e7f6ec;color:#1c7a43}
+  .tab{padding:.55rem 1rem;border-radius:3px;font-weight:600;color:#6b5270;cursor:pointer}
+  .tab.active{background:#4A154B;color:#fff}
+  /* calendar */
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .cal .dow{text-align:center;font-size:.62rem;font-weight:700;letter-spacing:.12em;color:#9b7fa0;text-transform:uppercase}
+  .cell{border:1px solid rgba(74,21,75,.1);border-radius:4px;min-height:74px;padding:5px;background:#fff;display:flex;flex-direction:column;gap:4px}
+  .cell.dim{background:transparent;border-color:transparent}
+  .cell.past{opacity:.45}
+  .cell .dnum{font-size:.72rem;font-weight:700;color:#4A154B}
+  .cell.today .dnum{background:#D4AF37;color:#2a0b2c;border-radius:9999px;width:1.3rem;height:1.3rem;display:flex;align-items:center;justify-content:center}
+  .slot{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;border-radius:3px;padding:.15rem .3rem;text-align:center;border:1px solid transparent}
+  .slot.open{background:rgba(212,175,55,.16);color:#8a6d16}
+  .slot.resv{background:#efe2f0;color:#8a4f90}
+  .slot.can{cursor:pointer} .slot.can:hover{outline:1px solid #D4AF37}
+  .hidden{display:none}
 </style>
 </head>
 <body class="min-h-screen">
 
-<header class="bg-regal text-cream">
-  <div class="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <span class="w-9 h-9 rounded-full bg-cream flex items-center justify-center" style="box-shadow:0 0 0 1px #D4AF37">
-        <img src="brand_assets/slgs-logo-png.png" alt="" class="w-6 h-6 object-contain">
-      </span>
-      <div class="leading-tight">
-        <div class="font-serif font-700 text-sm">Status Building Event Center</div>
-        <div class="text-[.62rem] tracking-[.22em] uppercase text-gold-pale/80">Bookings admin</div>
+<header class="bg-regal text-cream sticky top-0 z-20">
+  <div class="max-w-6xl mx-auto px-4 sm:px-5 h-16 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3 min-w-0">
+      <span class="w-9 h-9 rounded-full bg-cream flex items-center justify-center shrink-0" style="box-shadow:0 0 0 1px #D4AF37"><img src="brand_assets/slgs-logo-png.png" alt="" class="w-6 h-6 object-contain"></span>
+      <div class="leading-tight min-w-0">
+        <div class="font-serif font-700 text-sm truncate">Status Building Event Center</div>
+        <div class="text-[.6rem] tracking-[.2em] uppercase text-gold-pale/80">Bookings admin</div>
       </div>
     </div>
-    <button id="signOutBtn" class="btn btn-ghost !text-regal hidden text-sm">Sign out</button>
+    <div id="topRight" class="hidden items-center gap-2 sm:gap-3">
+      <span id="roleBadge" class="pill bg-gold-pale/20 text-gold-pale border border-gold/40"></span>
+      <button id="bellBtn" class="relative text-cream p-1.5" aria-label="Notifications" title="Notifications">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span id="bellCount" class="hidden absolute -top-0.5 -right-0.5 bg-gold text-regal-dark text-[.6rem] font-700 rounded-full min-w-[1.05rem] h-[1.05rem] px-1 flex items-center justify-center">0</span>
+      </button>
+      <button id="signOutBtn" class="btn btn-ghost !text-regal text-sm">Sign out</button>
+    </div>
+  </div>
+  <!-- notifications dropdown -->
+  <div id="notifPanel" class="hidden absolute right-2 sm:right-5 mt-1 w-[22rem] max-w-[92vw] card text-charcoal p-0 overflow-hidden">
+    <div class="flex items-center justify-between px-4 py-3 border-b border-black/5">
+      <span class="font-serif font-700 text-regal">Notifications</span>
+      <button id="markRead" class="text-xs text-regal underline decoration-gold/50 underline-offset-2">Mark all read</button>
+    </div>
+    <div id="notifList" class="max-h-80 overflow-y-auto"></div>
   </div>
 </header>
 
-<main class="max-w-5xl mx-auto px-5 py-8">
+<main class="max-w-6xl mx-auto px-4 sm:px-5 py-8">
 
   <!-- ===== Login ===== -->
   <section id="loginView" class="max-w-sm mx-auto card p-7 mt-6">
     <h1 class="text-regal text-2xl font-700">Admin sign in</h1>
-    <p class="text-charcoal/70 text-sm mt-1 mb-5">Manage session availability and booking requests.</p>
+    <p class="text-charcoal/70 text-sm mt-1 mb-5">Manage availability, bookings, payments and staff.</p>
     <form id="loginForm" class="space-y-4">
       <div><label for="email">Email</label><input id="email" type="email" required autocomplete="username"></div>
       <div><label for="password">Password</label><input id="password" type="password" required autocomplete="current-password"></div>
@@ -69,10 +93,10 @@
       <button id="loginBtn" type="submit" class="btn btn-purple w-full">Sign in</button>
     </form>
     <div class="mt-5 pt-4 border-t border-black/5 text-sm">
-      <button id="showSignup" class="text-regal underline decoration-gold/50 underline-offset-4">First time? Create the admin account</button>
+      <button id="showSignup" class="text-regal underline decoration-gold/50 underline-offset-4">First time? Create your account</button>
       <form id="signupForm" class="hidden space-y-3 mt-3">
-        <div><label for="suName">Name</label><input id="suName" type="text" placeholder="Owner"></div>
-        <p class="text-xs text-charcoal/55">Uses the email &amp; password above. After creating, you'll get a one-line SQL to run once to grant yourself admin rights.</p>
+        <div><label for="suName">Name</label><input id="suName" type="text" placeholder="Your name"></div>
+        <p class="text-xs text-charcoal/55">Uses the email &amp; password above. After creating, you'll be shown your User ID and the next step.</p>
         <button id="signupBtn" type="submit" class="btn btn-gold w-full">Create account</button>
       </form>
     </div>
@@ -80,47 +104,108 @@
 
   <!-- ===== Dashboard ===== -->
   <section id="dashView" class="hidden">
-    <div id="whoami" class="text-sm text-charcoal/70 mb-5"></div>
+    <div id="whoami" class="text-sm text-charcoal/70 mb-4"></div>
 
-    <!-- not-admin notice -->
-    <div id="notAdmin" class="hidden card p-5 mb-6 border-l-4 border-gold">
-      <h3 class="text-regal font-700">One step to finish setup</h3>
-      <p class="text-sm text-charcoal/80 mt-1">This account isn't an admin yet. Open the <strong>Neon SQL Editor</strong> and run this once, then reload this page:</p>
-      <pre id="bootstrapSql" class="mt-3 bg-regal-ink text-gold-soft text-xs rounded p-3 overflow-x-auto"></pre>
-      <button id="copySql" class="btn btn-ghost text-sm mt-2">Copy SQL</button>
-      <button id="recheckAdmin" class="btn btn-purple text-sm mt-2">I've run it — recheck</button>
+    <!-- not-staff notice -->
+    <div id="notStaff" class="hidden card p-5 mb-6 border-l-4 border-gold">
+      <h3 class="text-regal font-700">You're signed in — one more step</h3>
+      <p class="text-sm text-charcoal/80 mt-1">Your account isn't linked to a staff role yet. Your <strong>User ID</strong> is:</p>
+      <code id="myId" class="block mt-2 bg-tint text-regal text-sm rounded px-3 py-2 break-all"></code>
+      <p class="text-sm text-charcoal/80 mt-4"><strong>First-time setup (owner):</strong> run this once in the Neon SQL Editor, then click recheck:</p>
+      <pre id="bootstrapSql" class="mt-2 bg-regal-ink text-gold-soft text-xs rounded p-3 overflow-x-auto"></pre>
+      <p class="text-sm text-charcoal/70 mt-3">Already have an admin? Send them your User ID and they'll add you with a role.</p>
+      <div class="flex gap-2 mt-3">
+        <button id="copyId" class="btn btn-ghost text-sm">Copy ID</button>
+        <button id="copySql" class="btn btn-ghost text-sm">Copy SQL</button>
+        <button id="recheck" class="btn btn-purple text-sm">I've run it — recheck</button>
+      </div>
     </div>
 
-    <div id="adminTools" class="hidden grid lg:grid-cols-2 gap-6">
-      <!-- Sessions -->
-      <div class="card p-6">
-        <h2 class="text-regal text-xl font-700">Open / close sessions</h2>
-        <p class="text-charcoal/65 text-sm mt-1 mb-4">Pick a date, then toggle each session. "Reserved" hides it from public booking.</p>
-        <label for="sessDate">Date</label>
-        <input id="sessDate" type="date" class="mb-4">
-        <div id="sessList" class="space-y-3"></div>
+    <!-- tools -->
+    <div id="tools" class="hidden">
+      <div class="flex items-center gap-2 mb-6 flex-wrap">
+        <button class="tab active" data-tab="calendar">Calendar</button>
+        <button class="tab" data-tab="bookings">Bookings</button>
+        <button id="staffTab" class="tab hidden" data-tab="staff">Staff</button>
+      </div>
+
+      <!-- Calendar -->
+      <div id="tab-calendar" class="tabpane">
+        <div class="card p-5 sm:p-6">
+          <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <button id="calPrev" class="btn btn-ghost !px-3" aria-label="Previous">‹</button>
+              <h2 id="calLabel" class="text-regal text-lg font-700 min-w-[11rem] text-center"></h2>
+              <button id="calNext" class="btn btn-ghost !px-3" aria-label="Next">›</button>
+            </div>
+            <div class="flex items-center gap-1 bg-tint rounded p-1">
+              <button id="modeMonth" class="tab !py-1.5 !px-3 text-sm active">Month</button>
+              <button id="modeWeek"  class="tab !py-1.5 !px-3 text-sm">Week</button>
+            </div>
+          </div>
+          <div id="calGrid"></div>
+          <div class="flex flex-wrap gap-x-5 gap-y-1 mt-4 text-xs text-charcoal/70">
+            <span class="flex items-center gap-1.5"><span class="slot open px-2">D</span> Daytime 8:00am–4:00pm</span>
+            <span class="flex items-center gap-1.5"><span class="slot open px-2">E</span> Evening 4:30pm–12:00am</span>
+            <span class="flex items-center gap-1.5"><span class="slot resv px-2">■</span> Reserved</span>
+            <span id="calHint" class="text-charcoal/50"></span>
+          </div>
+        </div>
       </div>
 
       <!-- Bookings -->
-      <div class="card p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-regal text-xl font-700">Booking requests</h2>
-          <button id="refreshBookings" class="btn btn-ghost text-sm">Refresh</button>
+      <div id="tab-bookings" class="tabpane hidden">
+        <div class="card p-5 sm:p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-regal text-lg font-700">Booking requests</h2>
+            <div class="flex items-center gap-2">
+              <select id="bookFilter" class="!w-auto text-sm"><option value="">All</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="declined">Declined</option></select>
+              <button id="refreshBookings" class="btn btn-ghost text-sm">Refresh</button>
+            </div>
+          </div>
+          <div id="bookingList" class="space-y-3"></div>
         </div>
-        <div id="bookingList" class="space-y-3 max-h-[32rem] overflow-y-auto"></div>
+      </div>
+
+      <!-- Staff -->
+      <div id="tab-staff" class="tabpane hidden">
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="card p-5 sm:p-6">
+            <h2 class="text-regal text-lg font-700 mb-4">Staff</h2>
+            <div id="staffList" class="space-y-2"></div>
+          </div>
+          <div class="card p-5 sm:p-6">
+            <h2 class="text-regal text-lg font-700 mb-1">Add a staff member</h2>
+            <p class="text-xs text-charcoal/60 mb-4">Ask the person to open this admin page and <strong>create their account</strong> — they'll be shown their User ID. Paste it here with a role.</p>
+            <form id="addStaffForm" class="space-y-3">
+              <div><label for="sfId">User ID</label><input id="sfId" type="text" required placeholder="paste the person's User ID"></div>
+              <div class="grid grid-cols-2 gap-3">
+                <div><label for="sfRole">Role</label><select id="sfRole"><option value="estate">Estate Officer</option><option value="finance">Finance</option><option value="admin">Admin</option></select></div>
+                <div><label for="sfLabel">Name / label</label><input id="sfLabel" type="text" placeholder="e.g. J. Kamara"></div>
+              </div>
+              <p id="staffError" class="hidden text-sm text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2"></p>
+              <button id="addStaffBtn" type="submit" class="btn btn-purple w-full">Add staff member</button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 </main>
 
 <script>
-/* ======================= CONFIG (same project as the site) ======================= */
+/* ======================= CONFIG ======================= */
 const NEON_DATA_API = 'https://ep-wild-flower-b5u5zffr.apirest.c-7.us-east-2.aws.neon.tech/neondb/rest/v1';
 const NEON_AUTH     = 'https://ep-wild-flower-b5u5zffr.neonauth.c-7.us-east-2.aws.neon.tech/neondb/auth';
-const SESSIONS = [ { key:'daytime', name:'Daytime', time:'8:00am – 4:00pm' }, { key:'evening', name:'Evening', time:'4:30pm – 12:00am' } ];
+const SESSIONS = [ { key:'daytime', name:'Daytime', short:'D' }, { key:'evening', name:'Evening', short:'E' } ];
+const ROLE_LABEL = { admin:'Administrator', finance:'Finance Officer', estate:'Estate Officer' };
 
 /* ======================= Auth ======================= */
-let jwt=null, jwtExp=0, currentUser=null, isAdmin=false;
+let jwt=null, jwtExp=0, currentUser=null, myRole=null;
+const canSessions = () => myRole==='admin' || myRole==='estate';
+const canPayments = () => myRole==='admin' || myRole==='finance';
+const isAdminRole = () => myRole==='admin';
+const $ = id => document.getElementById(id);
 
 async function getJWT(force){
   const now = Date.now()/1000;
@@ -132,146 +217,249 @@ async function getJWT(force){
   return jwt;
 }
 async function api(path, opts={}){
-  let tok;
-  try { tok = await getJWT(); } catch { showLogin(); throw new Error('not-signed-in'); }
+  let tok; try { tok = await getJWT(); } catch { showLogin(); throw new Error('not-signed-in'); }
   const go = t => fetch(NEON_DATA_API + path, { ...opts, headers:{ ...(opts.headers||{}), Authorization:'Bearer '+t } });
   let r = await go(tok);
   if (r.status === 401) { tok = await getJWT(true); r = await go(tok); }
   return r;
 }
-async function currentSession(){
-  try { const r = await fetch(NEON_AUTH + '/get-session', { credentials:'include' }); if(!r.ok) return null; const s = await r.json(); return s && s.user ? s.user : null; }
-  catch { return null; }
-}
-async function signIn(email, password){
-  const r = await fetch(NEON_AUTH + '/sign-in/email', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password }) });
-  if (!r.ok) { let m='Sign-in failed'; try{ m=(await r.json()).message||m; }catch{} throw new Error(m); }
-  return (await r.json()).user;
-}
-async function signUp(email, password, name){
-  const r = await fetch(NEON_AUTH + '/sign-up/email', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password, name: name||email }) });
-  if (!r.ok) { let m='Sign-up failed'; try{ m=(await r.json()).message||m; }catch{} throw new Error(m); }
-  return (await r.json()).user;
-}
-async function signOut(){ try{ await fetch(NEON_AUTH + '/sign-out', { method:'POST', credentials:'include' }); }catch{} jwt=null; jwtExp=0; currentUser=null; isAdmin=false; }
-async function checkAdmin(){ try { const r = await api('/rpc/is_admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' }); isAdmin = r.ok && (await r.json())===true; } catch { isAdmin=false; } return isAdmin; }
+async function currentSession(){ try{ const r=await fetch(NEON_AUTH+'/get-session',{credentials:'include'}); if(!r.ok)return null; const s=await r.json(); return s&&s.user?s.user:null; }catch{ return null; } }
+async function signIn(email,password){ const r=await fetch(NEON_AUTH+'/sign-in/email',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})}); if(!r.ok){let m='Sign-in failed';try{m=(await r.json()).message||m;}catch{} throw new Error(m);} return (await r.json()).user; }
+async function signUp(email,password,name){ const r=await fetch(NEON_AUTH+'/sign-up/email',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,name:name||email})}); if(!r.ok){let m='Sign-up failed';try{m=(await r.json()).message||m;}catch{} throw new Error(m);} return (await r.json()).user; }
+async function signOut(){ try{ await fetch(NEON_AUTH+'/sign-out',{method:'POST',credentials:'include'}); }catch{} jwt=null;jwtExp=0;currentUser=null;myRole=null; }
+async function loadRole(){ try{ const r=await api('/rpc/my_role',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}); myRole = r.ok ? await r.json() : null; }catch{ myRole=null; } return myRole; }
 
 /* ======================= Data ops ======================= */
-async function reservedForDate(dateStr){ const r = await api('/availability?event_date=eq.'+dateStr+'&select=session'); if(!r.ok) return new Set(); return new Set((await r.json()).map(x=>x.session)); }
-async function reserveSlot(dateStr, session){ const r = await api('/availability', { method:'POST', headers:{'Content-Type':'application/json', Prefer:'return=minimal,resolution=ignore-duplicates'}, body: JSON.stringify({ event_date:dateStr, session }) }); return r.ok || r.status===409; }
-async function openSlot(dateStr, session){ const r = await api('/availability?event_date=eq.'+dateStr+'&session=eq.'+session, { method:'DELETE', headers:{Prefer:'return=minimal'} }); return r.ok; }
-async function listBookings(){ const r = await api('/bookings?select=*&order=created_at.desc'); return r.ok ? await r.json() : []; }
-async function setBookingStatus(id, status){ const r = await api('/bookings?id=eq.'+id, { method:'PATCH', headers:{'Content-Type':'application/json', Prefer:'return=minimal'}, body: JSON.stringify({ status }) }); return r.ok; }
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+async function reservedInRange(startStr,endStr){ const r=await api(`/availability?event_date=gte.${startStr}&event_date=lte.${endStr}&select=event_date,session`); if(!r.ok) return new Set(); return new Set((await r.json()).map(x=>x.event_date+'|'+x.session)); }
+async function reserveSlot(dateStr,session){ const r=await api('/availability',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal,resolution=ignore-duplicates'},body:JSON.stringify({event_date:dateStr,session})}); return r.ok||r.status===409; }
+async function openSlot(dateStr,session){ const r=await api(`/availability?event_date=eq.${dateStr}&session=eq.${session}`,{method:'DELETE',headers:{Prefer:'return=minimal'}}); return r.ok; }
+async function listBookings(filter){ let q='/bookings?select=*&order=created_at.desc'; if(filter) q+=`&status=eq.${filter}`; const r=await api(q); return r.ok?await r.json():[]; }
+async function patchBooking(id,fields){ const r=await api('/bookings?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(fields)}); return r.ok; }
+async function listStaff(){ const r=await api('/admins?select=*&order=created_at.asc'); return r.ok?await r.json():[]; }
+async function addStaff(user_id,role,label){ const r=await api('/admins',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({user_id,role,label})}); return r.ok; }
+async function updateStaff(user_id,fields){ const r=await api('/admins?user_id=eq.'+encodeURIComponent(user_id),{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(fields)}); return r.ok; }
+async function removeStaff(user_id){ const r=await api('/admins?user_id=eq.'+encodeURIComponent(user_id),{method:'DELETE',headers:{Prefer:'return=minimal'}}); return r.ok; }
+async function listNotifications(){ const r=await api('/notifications?select=*&order=created_at.desc&limit=40'); return r.ok?await r.json():[]; }
+async function markAllRead(){ await api('/notifications?read=eq.false',{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({read:true})}); }
 
 /* ======================= Views ======================= */
-const $ = id => document.getElementById(id);
-function showLogin(){ $('loginView').classList.remove('hidden'); $('dashView').classList.add('hidden'); $('signOutBtn').classList.add('hidden'); }
-function showDash(){ $('loginView').classList.add('hidden'); $('dashView').classList.remove('hidden'); $('signOutBtn').classList.remove('hidden'); }
+function showLogin(){ $('loginView').classList.remove('hidden'); $('dashView').classList.add('hidden'); $('topRight').classList.add('hidden'); $('topRight').classList.remove('flex'); }
+function showDash(){ $('loginView').classList.add('hidden'); $('dashView').classList.remove('hidden'); $('topRight').classList.remove('hidden'); $('topRight').classList.add('flex'); }
 
 async function enterDashboard(){
   showDash();
   $('whoami').innerHTML = `Signed in as <strong>${currentUser.email}</strong>`;
-  await checkAdmin();
-  if (isAdmin) {
-    $('notAdmin').classList.add('hidden'); $('adminTools').classList.remove('hidden');
-    const d = new Date(); d.setHours(0,0,0,0);
-    const todayStr = d.toISOString().slice(0,10);
-    $('sessDate').min = todayStr; $('sessDate').value = todayStr;
-    await renderSessions(todayStr);
-    await renderBookings();
-  } else {
-    $('adminTools').classList.add('hidden'); $('notAdmin').classList.remove('hidden');
-    $('bootstrapSql').textContent = `insert into admins (user_id, label)\nvalues ('${currentUser.id}', 'Owner');`;
+  await loadRole();
+  if (!myRole) {
+    $('tools').classList.add('hidden'); $('notStaff').classList.remove('hidden'); $('roleBadge').textContent='No role';
+    $('myId').textContent = currentUser.id;
+    $('bootstrapSql').textContent = `insert into admins (user_id, label, role)\nvalues ('${currentUser.id}', 'Owner', 'admin');`;
+    return;
   }
+  $('notStaff').classList.add('hidden'); $('tools').classList.remove('hidden');
+  $('roleBadge').textContent = ROLE_LABEL[myRole] || myRole;
+  $('staffTab').classList.toggle('hidden', !isAdminRole());
+  $('calHint').textContent = canSessions() ? 'Click a session to open/close it.' : 'View only (your role can’t change sessions).';
+  renderCalendar(); refreshBell();
 }
 
-async function renderSessions(dateStr){
-  const wrap = $('sessList'); wrap.innerHTML = '<p class="text-sm text-charcoal/50">Loading…</p>';
-  const reserved = await reservedForDate(dateStr);
-  wrap.innerHTML = '';
-  SESSIONS.forEach(s => {
-    const isRes = reserved.has(s.key);
-    const row = document.createElement('div');
-    row.className = 'flex items-center justify-between border rounded p-3';
-    row.style.borderColor = 'rgba(74,21,75,.14)';
-    row.innerHTML = `<div><div class="font-serif font-700 text-regal">${s.name}</div><div class="text-xs text-charcoal/60">${s.time}</div></div>
-      <div class="flex items-center gap-3"><span class="pill ${isRes?'pill-reserved':'pill-open'}">${isRes?'Reserved':'Open'}</span>
-      <button class="btn ${isRes?'btn-gold':'btn-purple'} text-sm toggle">${isRes?'Open it':'Reserve'}</button></div>`;
-    row.querySelector('.toggle').addEventListener('click', async (ev) => {
-      const b = ev.currentTarget; b.disabled = true; b.textContent = '…';
-      const ok = isRes ? await openSlot(dateStr, s.key) : await reserveSlot(dateStr, s.key);
-      if (!ok) { alert('Could not update this session. Please try again.'); b.disabled=false; }
-      await renderSessions(dateStr);
+/* ---- Calendar ---- */
+let calMode='month', calAnchor=new Date(); calAnchor.setHours(0,0,0,0);
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const today=new Date(); today.setHours(0,0,0,0);
+function startOfWeek(d){ const x=new Date(d); x.setDate(x.getDate()-x.getDay()); x.setHours(0,0,0,0); return x; }
+
+async function renderCalendar(){
+  const grid=$('calGrid');
+  let start, end, cells=[];
+  if (calMode==='month'){
+    const y=calAnchor.getFullYear(), m=calAnchor.getMonth();
+    $('calLabel').textContent = `${MONTHS[m]} ${y}`;
+    const first=new Date(y,m,1), startDow=first.getDay(), dim=new Date(y,m+1,0).getDate();
+    start=new Date(y,m,1); end=new Date(y,m,dim);
+    for(let i=0;i<startDow;i++) cells.push(null);
+    for(let d=1;d<=dim;d++) cells.push(new Date(y,m,d));
+  } else {
+    const s=startOfWeek(calAnchor); start=s; end=new Date(s); end.setDate(s.getDate()+6);
+    $('calLabel').textContent = `${start.getDate()} ${MONTHS[start.getMonth()].slice(0,3)} – ${end.getDate()} ${MONTHS[end.getMonth()].slice(0,3)} ${end.getFullYear()}`;
+    for(let i=0;i<7;i++){ const d=new Date(s); d.setDate(s.getDate()+i); cells.push(d); }
+  }
+  grid.innerHTML = '<div class="cal mb-1">'+['Su','Mo','Tu','We','Th','Fr','Sa'].map(x=>`<div class="dow">${x}</div>`).join('')+'</div><div class="cal" id="calBody"></div>';
+  const body=$('calBody');
+  const reserved = await reservedInRange(ymd(start), ymd(end));
+  cells.forEach(d=>{
+    const cell=document.createElement('div');
+    if(!d){ cell.className='cell dim'; body.appendChild(cell); return; }
+    const isPast = d<today, isToday = d.getTime()===today.getTime();
+    cell.className='cell'+(isPast?' past':'')+(isToday?' today':'');
+    cell.innerHTML = `<div class="dnum">${d.getDate()}</div>`;
+    SESSIONS.forEach(s=>{
+      const key=ymd(d)+'|'+s.key, resv=reserved.has(key);
+      const el=document.createElement('div');
+      el.className='slot '+(resv?'resv':'open')+((canSessions()&&!isPast)?' can':'');
+      el.textContent = s.short+(resv?' ✕':'');
+      el.title = `${s.name} — ${resv?'Reserved':'Open'}`;
+      if(canSessions() && !isPast){
+        el.addEventListener('click', async ()=>{
+          el.style.opacity=.5;
+          const ok = resv ? await openSlot(ymd(d),s.key) : await reserveSlot(ymd(d),s.key);
+          if(!ok) alert('Could not update. Try again.');
+          renderCalendar();
+        });
+      }
+      cell.appendChild(el);
     });
-    wrap.appendChild(row);
+    body.appendChild(cell);
   });
 }
 
+/* ---- Bookings ---- */
 function fmtDate(str){ const [y,m,d]=str.split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'}); }
-function sessName(k){ return (SESSIONS.find(s=>s.key===k)||{}).name || k; }
+function fmtTs(ts){ try{ return new Date(ts).toLocaleString(undefined,{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch{ return ts; } }
+function sName(k){ return (SESSIONS.find(s=>s.key===k)||{}).name||k; }
 
 async function renderBookings(){
-  const wrap = $('bookingList'); wrap.innerHTML = '<p class="text-sm text-charcoal/50">Loading…</p>';
-  const rows = await listBookings();
-  if (!rows.length) { wrap.innerHTML = '<p class="text-sm text-charcoal/55">No booking requests yet.</p>'; return; }
-  wrap.innerHTML = '';
-  rows.forEach(b => {
-    const el = document.createElement('div');
-    el.className = 'border rounded p-3'; el.style.borderColor = 'rgba(74,21,75,.14)';
-    const guests = b.guests ? ` · ${b.guests} guests` : '';
-    el.innerHTML = `
+  const wrap=$('bookingList'); wrap.innerHTML='<p class="text-sm text-charcoal/50">Loading…</p>';
+  const rows=await listBookings($('bookFilter').value);
+  if(!rows.length){ wrap.innerHTML='<p class="text-sm text-charcoal/55">No booking requests.</p>'; return; }
+  wrap.innerHTML='';
+  rows.forEach(b=>{
+    const el=document.createElement('div'); el.className='border rounded p-3'; el.style.borderColor='rgba(74,21,75,.14)';
+    const guests=b.guests?` · ${b.guests} guests`:'';
+    const canConfirm=canSessions(), canPay=canPayments();
+    const payRow = canPay ? `
+      <div class="mt-3 pt-3 border-t border-black/5">
+        <div class="text-[.7rem] font-700 uppercase tracking-wide text-regal mb-2">Payment</div>
+        <div class="grid sm:grid-cols-4 gap-2 items-end">
+          <div><label>Status</label><select class="pstat text-sm">
+            <option value="unpaid"${b.payment_status==='unpaid'?' selected':''}>Unpaid</option>
+            <option value="part"${b.payment_status==='part'?' selected':''}>Part payment</option>
+            <option value="full"${b.payment_status==='full'?' selected':''}>Full payment</option>
+          </select></div>
+          <div><label>Amount paid</label><input class="pamt text-sm" type="number" step="0.01" value="${b.amount_paid??''}" placeholder="0.00"></div>
+          <div><label>Receipt no.</label><input class="prcpt text-sm" type="text" value="${b.receipt_number??''}" placeholder="e.g. RCP-0001"></div>
+          <div><button class="btn btn-purple text-sm savePay">Save payment</button></div>
+        </div>
+      </div>` : (b.payment_status!=='unpaid' ? `<div class="mt-2 text-xs text-charcoal/70">Payment: <span class="pill pill-${b.payment_status}">${b.payment_status==='part'?'Part':'Full'}</span>${b.receipt_number?` · receipt ${b.receipt_number}`:''}${b.amount_paid?` · ${b.amount_paid}`:''}</div>`:'');
+    el.innerHTML=`
       <div class="flex items-start justify-between gap-2">
         <div>
-          <div class="font-serif font-700 text-regal">${fmtDate(b.event_date)} · ${sessName(b.session)}</div>
+          <div class="font-serif font-700 text-regal">${fmtDate(b.event_date)} · ${sName(b.session)}</div>
           <div class="text-sm text-charcoal/80">${b.name} — ${b.event_type||'—'}${guests}</div>
           <div class="text-xs text-charcoal/60 mt-0.5">${b.email}${b.phone?' · '+b.phone:''}</div>
+          <div class="text-[.68rem] text-charcoal/45 mt-1">Requested ${fmtTs(b.created_at)}</div>
         </div>
-        <span class="pill pill-${b.status}">${b.status}</span>
+        <div class="flex flex-col items-end gap-1">
+          <span class="pill pill-${b.status}">${b.status}</span>
+          <span class="pill pill-${b.payment_status}">${b.payment_status==='unpaid'?'Unpaid':b.payment_status==='part'?'Part paid':'Paid'}</span>
+        </div>
       </div>
-      <div class="flex gap-2 mt-3">
+      ${canConfirm?`<div class="flex gap-2 mt-3">
         <button class="btn btn-purple text-xs confirm" ${b.status==='confirmed'?'disabled':''}>Confirm &amp; reserve</button>
         <button class="btn btn-ghost text-xs decline" ${b.status==='declined'?'disabled':''}>Decline</button>
-      </div>`;
-    el.querySelector('.confirm').addEventListener('click', async (ev)=>{
-      ev.currentTarget.disabled=true;
-      await setBookingStatus(b.id,'confirmed');
-      await reserveSlot(b.event_date, b.session);
-      await renderBookings();
-      if ($('sessDate').value === b.event_date) await renderSessions(b.event_date);
-    });
-    el.querySelector('.decline').addEventListener('click', async (ev)=>{
-      ev.currentTarget.disabled=true; await setBookingStatus(b.id,'declined'); await renderBookings();
-    });
+      </div>`:''}
+      ${payRow}`;
+    if(canConfirm){
+      el.querySelector('.confirm').addEventListener('click', async ev=>{ ev.currentTarget.disabled=true; await patchBooking(b.id,{status:'confirmed'}); await reserveSlot(b.event_date,b.session); renderBookings(); });
+      el.querySelector('.decline').addEventListener('click', async ev=>{ ev.currentTarget.disabled=true; await patchBooking(b.id,{status:'declined'}); renderBookings(); });
+    }
+    if(canPay){
+      el.querySelector('.savePay').addEventListener('click', async ev=>{
+        const btn=ev.currentTarget; btn.disabled=true; btn.textContent='Saving…';
+        const ps=el.querySelector('.pstat').value, amt=el.querySelector('.pamt').value, rc=el.querySelector('.prcpt').value.trim();
+        const ok=await patchBooking(b.id,{ payment_status:ps, amount_paid: amt===''?null:Number(amt), receipt_number: rc||null });
+        if(!ok){ alert('Could not save payment.'); btn.disabled=false; btn.textContent='Save payment'; } else renderBookings();
+      });
+    }
     wrap.appendChild(el);
   });
 }
 
-/* ======================= Wire up ======================= */
-$('loginForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  $('loginError').classList.add('hidden');
-  const btn=$('loginBtn'); btn.disabled=true; btn.textContent='Signing in…';
-  try { currentUser = await signIn($('email').value.trim(), $('password').value); await enterDashboard(); }
-  catch (err) { $('loginError').textContent = err.message; $('loginError').classList.remove('hidden'); }
-  finally { btn.disabled=false; btn.textContent='Sign in'; }
-});
-$('showSignup').addEventListener('click', ()=> $('signupForm').classList.toggle('hidden'));
-$('signupForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  $('loginError').classList.add('hidden');
-  const btn=$('signupBtn'); btn.disabled=true; btn.textContent='Creating…';
-  try { currentUser = await signUp($('email').value.trim(), $('password').value, $('suName').value.trim()); await enterDashboard(); }
-  catch (err) { $('loginError').textContent = err.message; $('loginError').classList.remove('hidden'); }
-  finally { btn.disabled=false; btn.textContent='Create account'; }
-});
-$('signOutBtn').addEventListener('click', async ()=>{ await signOut(); showLogin(); });
-$('sessDate').addEventListener('change', e => renderSessions(e.target.value));
-$('refreshBookings').addEventListener('click', renderBookings);
-$('recheckAdmin').addEventListener('click', enterDashboard);
-$('copySql').addEventListener('click', ()=>{ navigator.clipboard.writeText($('bootstrapSql').textContent).then(()=>{ $('copySql').textContent='Copied'; setTimeout(()=>$('copySql').textContent='Copy SQL',1500); }); });
+/* ---- Staff ---- */
+async function renderStaff(){
+  const wrap=$('staffList'); wrap.innerHTML='<p class="text-sm text-charcoal/50">Loading…</p>';
+  const rows=await listStaff(); wrap.innerHTML='';
+  if(!rows.length){ wrap.innerHTML='<p class="text-sm text-charcoal/55">No staff yet.</p>'; }
+  rows.forEach(s=>{
+    const el=document.createElement('div'); el.className='flex items-center justify-between gap-2 border rounded p-2.5'; el.style.borderColor='rgba(74,21,75,.12)';
+    const me = s.user_id===currentUser.id;
+    el.innerHTML=`<div class="min-w-0">
+        <div class="text-sm font-600 text-regal truncate">${s.label||'(no name)'} ${me?'<span class="text-[.65rem] text-charcoal/50">(you)</span>':''}</div>
+        <div class="text-[.66rem] text-charcoal/45 break-all">${s.user_id}</div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <select class="rolesel !w-auto text-xs">
+          <option value="estate"${s.role==='estate'?' selected':''}>Estate</option>
+          <option value="finance"${s.role==='finance'?' selected':''}>Finance</option>
+          <option value="admin"${s.role==='admin'?' selected':''}>Admin</option>
+        </select>
+        <button class="btn btn-ghost !px-2 text-xs rm" ${me?'disabled title="Cannot remove yourself"':''}>Remove</button>
+      </div>`;
+    el.querySelector('.rolesel').addEventListener('change', async ev=>{ const ok=await updateStaff(s.user_id,{role:ev.target.value}); if(!ok){ alert('Could not change role.'); renderStaff(); } });
+    if(!me) el.querySelector('.rm').addEventListener('click', async ()=>{ if(confirm('Remove '+(s.label||s.user_id)+'?')){ await removeStaff(s.user_id); renderStaff(); } });
+    wrap.appendChild(el);
+  });
+}
 
-/* Resume an existing session on load */
-(async ()=>{ currentUser = await currentSession(); if (currentUser) await enterDashboard(); else showLogin(); })();
+/* ---- Notifications ---- */
+async function refreshBell(){
+  const items=await listNotifications();
+  const unread=items.filter(n=>!n.read).length;
+  const c=$('bellCount'); if(unread>0){ c.textContent=unread>99?'99+':unread; c.classList.remove('hidden'); } else c.classList.add('hidden');
+  const list=$('notifList');
+  list.innerHTML = items.length ? items.map(n=>`<div class="px-4 py-2.5 border-b border-black/5 ${n.read?'':'bg-tint/60'}">
+     <div class="text-sm text-charcoal/90">${n.message}</div>
+     <div class="text-[.66rem] text-charcoal/45 mt-0.5">${fmtTs(n.created_at)}</div></div>`).join('')
+     : '<div class="px-4 py-6 text-sm text-charcoal/55 text-center">No notifications.</div>';
+}
+
+/* ======================= Wire up ======================= */
+$('loginForm').addEventListener('submit', async e=>{ e.preventDefault(); $('loginError').classList.add('hidden'); const b=$('loginBtn'); b.disabled=true; b.textContent='Signing in…';
+  try{ currentUser=await signIn($('email').value.trim(),$('password').value); await enterDashboard(); }
+  catch(err){ $('loginError').textContent=err.message; $('loginError').classList.remove('hidden'); }
+  finally{ b.disabled=false; b.textContent='Sign in'; } });
+$('showSignup').addEventListener('click', ()=> $('signupForm').classList.toggle('hidden'));
+$('signupForm').addEventListener('submit', async e=>{ e.preventDefault(); $('loginError').classList.add('hidden'); const b=$('signupBtn'); b.disabled=true; b.textContent='Creating…';
+  try{ currentUser=await signUp($('email').value.trim(),$('password').value,$('suName').value.trim()); await enterDashboard(); }
+  catch(err){ $('loginError').textContent=err.message; $('loginError').classList.remove('hidden'); }
+  finally{ b.disabled=false; b.textContent='Create account'; } });
+$('signOutBtn').addEventListener('click', async ()=>{ await signOut(); showLogin(); });
+$('recheck').addEventListener('click', enterDashboard);
+$('copyId').addEventListener('click', ()=> navigator.clipboard.writeText($('myId').textContent).then(()=>{ $('copyId').textContent='Copied'; setTimeout(()=>$('copyId').textContent='Copy ID',1500); }));
+$('copySql').addEventListener('click', ()=> navigator.clipboard.writeText($('bootstrapSql').textContent).then(()=>{ $('copySql').textContent='Copied'; setTimeout(()=>$('copySql').textContent='Copy SQL',1500); }));
+
+// tabs
+document.querySelectorAll('.tab[data-tab]').forEach(t=> t.addEventListener('click', ()=>{
+  document.querySelectorAll('.tab[data-tab]').forEach(x=>x.classList.remove('active')); t.classList.add('active');
+  const name=t.dataset.tab;
+  document.querySelectorAll('.tabpane').forEach(p=>p.classList.add('hidden'));
+  $('tab-'+name).classList.remove('hidden');
+  if(name==='bookings') renderBookings();
+  if(name==='staff') renderStaff();
+  if(name==='calendar') renderCalendar();
+}));
+// calendar controls
+$('modeMonth').addEventListener('click', ()=>{ calMode='month'; $('modeMonth').classList.add('active'); $('modeWeek').classList.remove('active'); renderCalendar(); });
+$('modeWeek').addEventListener('click',  ()=>{ calMode='week';  $('modeWeek').classList.add('active');  $('modeMonth').classList.remove('active'); renderCalendar(); });
+$('calPrev').addEventListener('click', ()=>{ if(calMode==='month') calAnchor.setMonth(calAnchor.getMonth()-1); else calAnchor.setDate(calAnchor.getDate()-7); renderCalendar(); });
+$('calNext').addEventListener('click', ()=>{ if(calMode==='month') calAnchor.setMonth(calAnchor.getMonth()+1); else calAnchor.setDate(calAnchor.getDate()+7); renderCalendar(); });
+// bookings controls
+$('refreshBookings').addEventListener('click', renderBookings);
+$('bookFilter').addEventListener('change', renderBookings);
+// staff add
+$('addStaffForm').addEventListener('submit', async e=>{ e.preventDefault(); $('staffError').classList.add('hidden'); const b=$('addStaffBtn'); b.disabled=true; b.textContent='Adding…';
+  const ok=await addStaff($('sfId').value.trim(),$('sfRole').value,$('sfLabel').value.trim());
+  if(ok){ $('addStaffForm').reset(); renderStaff(); } else { $('staffError').textContent='Could not add (already a staff member, or invalid ID).'; $('staffError').classList.remove('hidden'); }
+  b.disabled=false; b.textContent='Add staff member'; });
+// notifications
+$('bellBtn').addEventListener('click', ()=>{ $('notifPanel').classList.toggle('hidden'); });
+$('markRead').addEventListener('click', async ()=>{ await markAllRead(); refreshBell(); });
+document.addEventListener('click', e=>{ if(!$('notifPanel').contains(e.target) && !$('bellBtn').contains(e.target)) $('notifPanel').classList.add('hidden'); });
+setInterval(()=>{ if(myRole) refreshBell(); }, 60000);
+
+/* Resume session on load */
+(async ()=>{ currentUser=await currentSession(); if(currentUser) await enterDashboard(); else showLogin(); })();
 </script>
 </body>
 </html>
