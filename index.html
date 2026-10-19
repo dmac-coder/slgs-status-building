@@ -309,7 +309,7 @@
         </div>
         <!-- floating accent card -->
         <div class="absolute -left-4 -bottom-6 sm:-left-8 bg-cream shadow-elev rounded-sm px-6 py-5 border-t-2 border-gold max-w-[15rem]">
-          <div class="text-regal font-serif font-700 text-2xl">5 event types</div>
+          <div class="text-regal font-serif font-700 text-2xl">6 event types</div>
           <p class="text-charcoal/70 text-sm mt-1">One hall, dressed for weddings, business and celebration alike.</p>
         </div>
       </div>
@@ -332,7 +332,7 @@
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
       <!-- large feature -->
       <article class="occasion group sm:col-span-2 lg:row-span-2 min-h-[22rem] lg:min-h-full">
-        <img src="images/weddings.jpg" alt="A wedding reception set in the hall" loading="lazy" decoding="async" />
+        <img src="images/weddings.jpg" alt="A couple in traditional wedding attire" loading="lazy" decoding="async" />
         <div class="tone"></div><div class="wash"></div>
         <div class="absolute inset-x-0 bottom-0 p-7">
           <h3 class="font-serif text-cream text-3xl font-700">Weddings &amp; receptions</h3>
@@ -350,7 +350,7 @@
       </article>
 
       <article class="occasion group min-h-[15rem]">
-        <img src="images/celebrations.jpg" alt="A private celebration" loading="lazy" decoding="async" />
+        <img src="images/celebrations.jpg" alt="Guests dancing at a celebration" loading="lazy" decoding="async" />
         <div class="tone"></div><div class="wash"></div>
         <div class="absolute inset-x-0 bottom-0 p-6">
           <h3 class="font-serif text-cream text-xl font-700">Private celebrations</h3>
@@ -368,11 +368,20 @@
       </article>
 
       <article class="occasion group min-h-[15rem]">
-        <img src="images/banquets.jpg" alt="A gala dinner set with round tables" loading="lazy" decoding="async" />
+        <img src="images/banquets.jpg" alt="A buffet served at a banquet" loading="lazy" decoding="async" />
         <div class="tone"></div><div class="wash"></div>
         <div class="absolute inset-x-0 bottom-0 p-6">
           <h3 class="font-serif text-cream text-xl font-700">Galas &amp; banquets</h3>
           <p class="text-cream/80 text-sm mt-1.5">Formal dinners and fundraisers served in full elegance.</p>
+        </div>
+      </article>
+
+      <article class="occasion group min-h-[15rem]">
+        <img src="images/graduations.jpg" alt="Graduates in gowns at a ceremony" loading="lazy" decoding="async" />
+        <div class="tone"></div><div class="wash"></div>
+        <div class="absolute inset-x-0 bottom-0 p-6">
+          <h3 class="font-serif text-cream text-xl font-700">Graduations &amp; ceremonies</h3>
+          <p class="text-cream/80 text-sm mt-1.5">Convocations, prize nights and milestone moments.</p>
         </div>
       </article>
     </div>
@@ -454,10 +463,15 @@
                 <option>Private celebration</option>
                 <option>Seminar / workshop</option>
                 <option>Gala / banquet</option>
+                <option>Graduation / ceremony</option>
                 <option>Other</option>
               </select>
             </div>
             <div class="field sm:col-span-2"><label for="fGuests">Expected guests</label><input id="fGuests" name="guests" type="number" min="1" max="350" placeholder="Up to 350" /></div>
+            <div class="field sm:col-span-2 hidden" id="otherWrap">
+              <label for="fOther">What's the occasion?</label>
+              <input id="fOther" name="otherPurpose" type="text" placeholder="Tell us the purpose of your event" />
+            </div>
           </div>
           <p id="formError" class="hidden text-sm text-red-700 bg-red-50 border border-red-200 rounded-sm px-3 py-2 mt-4"></p>
           <button id="submitBtn" type="submit" class="btn btn-purple w-full justify-center mt-6">Request this date</button>
@@ -500,11 +514,11 @@
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 reveal">
-      <div class="gal col-span-2 row-span-2 min-h-[16rem]"><img src="images/gallery-main-hall.jpg" alt="The main hall set for an event" loading="lazy" decoding="async" /><div class="tone"></div></div>
-      <div class="gal min-h-[12rem]"><img src="images/gallery-banquet.jpg" alt="Banquet seating" loading="lazy" decoding="async" /><div class="tone"></div></div>
-      <div class="gal min-h-[12rem]"><img src="images/gallery-stage.jpg" alt="Stage and lighting" loading="lazy" decoding="async" /><div class="tone"></div></div>
-      <div class="gal min-h-[12rem]"><img src="images/gallery-conference.jpg" alt="The hall arranged for a conference" loading="lazy" decoding="async" /><div class="tone"></div></div>
-      <div class="gal min-h-[12rem]"><img src="images/gallery-grounds.jpg" alt="Outdoor ceremony space in the grounds" loading="lazy" decoding="async" /><div class="tone"></div></div>
+      <div class="gal col-span-2 row-span-2 min-h-[16rem]"><img src="images/gallery-main-hall.jpg" alt="The hall dressed for a reception" loading="lazy" decoding="async" /><div class="tone"></div></div>
+      <div class="gal min-h-[12rem]"><img src="images/gallery-tented.jpg" alt="An elegant tented event space" loading="lazy" decoding="async" /><div class="tone"></div></div>
+      <div class="gal min-h-[12rem]"><img src="images/gallery-couple.jpg" alt="A couple on their wedding day" loading="lazy" decoding="async" /><div class="tone"></div></div>
+      <div class="gal min-h-[12rem]"><img src="images/gallery-gathering.jpg" alt="Guests gathered for a ceremony" loading="lazy" decoding="async" /><div class="tone"></div></div>
+      <div class="gal min-h-[12rem]"><img src="images/gallery-grounds.jpg" alt="Flower-dressed seating in the grounds" loading="lazy" decoding="async" /><div class="tone"></div></div>
     </div>
     <p class="text-xs text-charcoal/50 mt-5">Imagery shown is placeholder — your real photographs of Status Building Event Center drop straight in.</p>
   </div>
@@ -780,7 +794,16 @@ const fName=document.getElementById('fName'), fEmail=document.getElementById('fE
       fPhone=document.getElementById('fPhone'), fType=document.getElementById('fType'),
       fGuests=document.getElementById('fGuests'), submitBtn=document.getElementById('submitBtn'),
       formError=document.getElementById('formError'), confirmMsg=document.getElementById('confirmMsg'),
-      gcalLink=document.getElementById('gcalLink'), icsLink=document.getElementById('icsLink');
+      gcalLink=document.getElementById('gcalLink'), icsLink=document.getElementById('icsLink'),
+      fOther=document.getElementById('fOther'), otherWrap=document.getElementById('otherWrap');
+
+/* Reveal the "what's the occasion?" field only when Event type is "Other". */
+fType.addEventListener('change', () => {
+  const isOther = fType.value === 'Other';
+  otherWrap.classList.toggle('hidden', !isOther);
+  fOther.required = isOther;
+  if(!isOther) fOther.value = '';
+});
 
 /* ---------- Calendar invite helpers ---------- */
 const pad = n => String(n).padStart(2,'0');
@@ -838,7 +861,7 @@ bookingForm.addEventListener('submit', async (e) => {
     Name: fName.value.trim(),
     Email: fEmail.value.trim(),
     Phone: fPhone.value.trim(),
-    'Event type': fType.value,
+    'Event type': (fType.value === 'Other' && fOther.value.trim()) ? `Other — ${fOther.value.trim()}` : fType.value,
     'Expected guests': fGuests.value.trim() || 'Not specified',
     'Requested date': fmtDate(selected),
     Session: `${chosenSession.name} (${chosenSession.time})`,
