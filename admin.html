@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Admin · Status Building Event Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: { regal:{DEFAULT:'#4A154B',deep:'#360f38',dark:'#2a0b2c',ink:'#1d0820'}, gold:{DEFAULT:'#D4AF37',soft:'#e3c868',deep:'#b8912a',pale:'#f0e3b8'}, charcoal:'#2B2B2B', mist:'#F4F4F4', tint:'#F7F4F8', cream:'#FBF9F4' },
+    fontFamily: { serif:['Merriweather','Georgia','serif'], sans:['"Open Sans"','system-ui','sans-serif'] },
+  } } };
+</script>
+<style>
+  body{background:#FBF9F4;color:#2B2B2B;font-family:'Open Sans',sans-serif}
+  h1,h2,h3{font-family:'Merriweather',serif}
+  .card{background:#fff;border:1px solid rgba(74,21,75,.12);border-radius:4px;box-shadow:0 2px 6px rgba(74,21,75,.06),0 14px 34px rgba(74,21,75,.08)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;font-weight:600;border-radius:3px;transition:background-color .2s,transform .15s,box-shadow .2s;cursor:pointer}
+  .btn:active{transform:translateY(1px)}
+  .btn-gold{background:#D4AF37;color:#2a0b2c;padding:.6rem 1.1rem}
+  .btn-gold:hover{background:#e3c868}
+  .btn-purple{background:#4A154B;color:#fff;padding:.6rem 1.1rem}
+  .btn-purple:hover{background:#360f38}
+  .btn-ghost{background:#fff;color:#4A154B;padding:.5rem .9rem;box-shadow:inset 0 0 0 1px rgba(74,21,75,.3)}
+  .btn-ghost:hover{background:#faf6fb}
+  .btn[disabled]{opacity:.5;cursor:default}
+  input,select{width:100%;padding:.6rem .7rem;border:1px solid rgba(74,21,75,.2);border-radius:3px;font-size:.95rem;background:#fff}
+  input:focus,select:focus{outline:none;border-color:#D4AF37;box-shadow:0 0 0 3px rgba(212,175,55,.18)}
+  label{font-size:.78rem;font-weight:600;color:#4A154B;margin-bottom:.25rem;display:block}
+  .pill{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .55rem;border-radius:2px}
+  .pill-open{background:rgba(212,175,55,.16);color:#8a6d16}
+  .pill-reserved{background:#f1e6f2;color:#9b6fa0}
+  .pill-pending{background:#eef;color:#4457b8}
+  .pill-confirmed{background:#e7f6ec;color:#1c7a43}
+  .pill-declined{background:#fdeaea;color:#b4433a}
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="bg-regal text-cream">
+  <div class="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="w-9 h-9 rounded-full bg-cream flex items-center justify-center" style="box-shadow:0 0 0 1px #D4AF37">
+        <img src="brand_assets/slgs-logo-png.png" alt="" class="w-6 h-6 object-contain">
+      </span>
+      <div class="leading-tight">
+        <div class="font-serif font-700 text-sm">Status Building Event Center</div>
+        <div class="text-[.62rem] tracking-[.22em] uppercase text-gold-pale/80">Bookings admin</div>
+      </div>
+    </div>
+    <button id="signOutBtn" class="btn btn-ghost !text-regal hidden text-sm">Sign out</button>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-5 py-8">
+
+  <!-- ===== Login ===== -->
+  <section id="loginView" class="max-w-sm mx-auto card p-7 mt-6">
+    <h1 class="text-regal text-2xl font-700">Admin sign in</h1>
+    <p class="text-charcoal/70 text-sm mt-1 mb-5">Manage session availability and booking requests.</p>
+    <form id="loginForm" class="space-y-4">
+      <div><label for="email">Email</label><input id="email" type="email" required autocomplete="username"></div>
+      <div><label for="password">Password</label><input id="password" type="password" required autocomplete="current-password"></div>
+      <p id="loginError" class="hidden text-sm text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2"></p>
+      <button id="loginBtn" type="submit" class="btn btn-purple w-full">Sign in</button>
+    </form>
+    <div class="mt-5 pt-4 border-t border-black/5 text-sm">
+      <button id="showSignup" class="text-regal underline decoration-gold/50 underline-offset-4">First time? Create the admin account</button>
+      <form id="signupForm" class="hidden space-y-3 mt-3">
+        <div><label for="suName">Name</label><input id="suName" type="text" placeholder="Owner"></div>
+        <p class="text-xs text-charcoal/55">Uses the email &amp; password above. After creating, you'll get a one-line SQL to run once to grant yourself admin rights.</p>
+        <button id="signupBtn" type="submit" class="btn btn-gold w-full">Create account</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== Dashboard ===== -->
+  <section id="dashView" class="hidden">
+    <div id="whoami" class="text-sm text-charcoal/70 mb-5"></div>
+
+    <!-- not-admin notice -->
+    <div id="notAdmin" class="hidden card p-5 mb-6 border-l-4 border-gold">
+      <h3 class="text-regal font-700">One step to finish setup</h3>
+      <p class="text-sm text-charcoal/80 mt-1">This account isn't an admin yet. Open the <strong>Neon SQL Editor</strong> and run this once, then reload this page:</p>
+      <pre id="bootstrapSql" class="mt-3 bg-regal-ink text-gold-soft text-xs rounded p-3 overflow-x-auto"></pre>
+      <button id="copySql" class="btn btn-ghost text-sm mt-2">Copy SQL</button>
+      <button id="recheckAdmin" class="btn btn-purple text-sm mt-2">I've run it — recheck</button>
+    </div>
+
+    <div id="adminTools" class="hidden grid lg:grid-cols-2 gap-6">
+      <!-- Sessions -->
+      <div class="card p-6">
+        <h2 class="text-regal text-xl font-700">Open / close sessions</h2>
+        <p class="text-charcoal/65 text-sm mt-1 mb-4">Pick a date, then toggle each session. "Reserved" hides it from public booking.</p>
+        <label for="sessDate">Date</label>
+        <input id="sessDate" type="date" class="mb-4">
+        <div id="sessList" class="space-y-3"></div>
+      </div>
+
+      <!-- Bookings -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-regal text-xl font-700">Booking requests</h2>
+          <button id="refreshBookings" class="btn btn-ghost text-sm">Refresh</button>
+        </div>
+        <div id="bookingList" class="space-y-3 max-h-[32rem] overflow-y-auto"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ======================= CONFIG (same project as the site) ======================= */
+const NEON_DATA_API = 'https://ep-wild-flower-b5u5zffr.apirest.c-7.us-east-2.aws.neon.tech/neondb/rest/v1';
+const NEON_AUTH     = 'https://ep-wild-flower-b5u5zffr.neonauth.c-7.us-east-2.aws.neon.tech/neondb/auth';
+const SESSIONS = [ { key:'daytime', name:'Daytime', time:'8:00am – 4:00pm' }, { key:'evening', name:'Evening', time:'4:30pm – 12:00am' } ];
+
+/* ======================= Auth ======================= */
+let jwt=null, jwtExp=0, currentUser=null, isAdmin=false;
+
+async function getJWT(force){
+  const now = Date.now()/1000;
+  if (!force && jwt && now < jwtExp-60) return jwt;
+  const r = await fetch(NEON_AUTH + '/token', { credentials:'include' });
+  if (!r.ok) throw new Error('not-signed-in');
+  jwt = (await r.json()).token;
+  try { jwtExp = JSON.parse(atob(jwt.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))).exp; } catch { jwtExp = now+600; }
+  return jwt;
+}
+async function api(path, opts={}){
+  let tok;
+  try { tok = await getJWT(); } catch { showLogin(); throw new Error('not-signed-in'); }
+  const go = t => fetch(NEON_DATA_API + path, { ...opts, headers:{ ...(opts.headers||{}), Authorization:'Bearer '+t } });
+  let r = await go(tok);
+  if (r.status === 401) { tok = await getJWT(true); r = await go(tok); }
+  return r;
+}
+async function currentSession(){
+  try { const r = await fetch(NEON_AUTH + '/get-session', { credentials:'include' }); if(!r.ok) return null; const s = await r.json(); return s && s.user ? s.user : null; }
+  catch { return null; }
+}
+async function signIn(email, password){
+  const r = await fetch(NEON_AUTH + '/sign-in/email', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password }) });
+  if (!r.ok) { let m='Sign-in failed'; try{ m=(await r.json()).message||m; }catch{} throw new Error(m); }
+  return (await r.json()).user;
+}
+async function signUp(email, password, name){
+  const r = await fetch(NEON_AUTH + '/sign-up/email', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password, name: name||email }) });
+  if (!r.ok) { let m='Sign-up failed'; try{ m=(await r.json()).message||m; }catch{} throw new Error(m); }
+  return (await r.json()).user;
+}
+async function signOut(){ try{ await fetch(NEON_AUTH + '/sign-out', { method:'POST', credentials:'include' }); }catch{} jwt=null; jwtExp=0; currentUser=null; isAdmin=false; }
+async function checkAdmin(){ try { const r = await api('/rpc/is_admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' }); isAdmin = r.ok && (await r.json())===true; } catch { isAdmin=false; } return isAdmin; }
+
+/* ======================= Data ops ======================= */
+async function reservedForDate(dateStr){ const r = await api('/availability?event_date=eq.'+dateStr+'&select=session'); if(!r.ok) return new Set(); return new Set((await r.json()).map(x=>x.session)); }
+async function reserveSlot(dateStr, session){ const r = await api('/availability', { method:'POST', headers:{'Content-Type':'application/json', Prefer:'return=minimal,resolution=ignore-duplicates'}, body: JSON.stringify({ event_date:dateStr, session }) }); return r.ok || r.status===409; }
+async function openSlot(dateStr, session){ const r = await api('/availability?event_date=eq.'+dateStr+'&session=eq.'+session, { method:'DELETE', headers:{Prefer:'return=minimal'} }); return r.ok; }
+async function listBookings(){ const r = await api('/bookings?select=*&order=created_at.desc'); return r.ok ? await r.json() : []; }
+async function setBookingStatus(id, status){ const r = await api('/bookings?id=eq.'+id, { method:'PATCH', headers:{'Content-Type':'application/json', Prefer:'return=minimal'}, body: JSON.stringify({ status }) }); return r.ok; }
+
+/* ======================= Views ======================= */
+const $ = id => document.getElementById(id);
+function showLogin(){ $('loginView').classList.remove('hidden'); $('dashView').classList.add('hidden'); $('signOutBtn').classList.add('hidden'); }
+function showDash(){ $('loginView').classList.add('hidden'); $('dashView').classList.remove('hidden'); $('signOutBtn').classList.remove('hidden'); }
+
+async function enterDashboard(){
+  showDash();
+  $('whoami').innerHTML = `Signed in as <strong>${currentUser.email}</strong>`;
+  await checkAdmin();
+  if (isAdmin) {
+    $('notAdmin').classList.add('hidden'); $('adminTools').classList.remove('hidden');
+    const d = new Date(); d.setHours(0,0,0,0);
+    const todayStr = d.toISOString().slice(0,10);
+    $('sessDate').min = todayStr; $('sessDate').value = todayStr;
+    await renderSessions(todayStr);
+    await renderBookings();
+  } else {
+    $('adminTools').classList.add('hidden'); $('notAdmin').classList.remove('hidden');
+    $('bootstrapSql').textContent = `insert into admins (user_id, label)\nvalues ('${currentUser.id}', 'Owner');`;
+  }
+}
+
+async function renderSessions(dateStr){
+  const wrap = $('sessList'); wrap.innerHTML = '<p class="text-sm text-charcoal/50">Loading…</p>';
+  const reserved = await reservedForDate(dateStr);
+  wrap.innerHTML = '';
+  SESSIONS.forEach(s => {
+    const isRes = reserved.has(s.key);
+    const row = document.createElement('div');
+    row.className = 'flex items-center justify-between border rounded p-3';
+    row.style.borderColor = 'rgba(74,21,75,.14)';
+    row.innerHTML = `<div><div class="font-serif font-700 text-regal">${s.name}</div><div class="text-xs text-charcoal/60">${s.time}</div></div>
+      <div class="flex items-center gap-3"><span class="pill ${isRes?'pill-reserved':'pill-open'}">${isRes?'Reserved':'Open'}</span>
+      <button class="btn ${isRes?'btn-gold':'btn-purple'} text-sm toggle">${isRes?'Open it':'Reserve'}</button></div>`;
+    row.querySelector('.toggle').addEventListener('click', async (ev) => {
+      const b = ev.currentTarget; b.disabled = true; b.textContent = '…';
+      const ok = isRes ? await openSlot(dateStr, s.key) : await reserveSlot(dateStr, s.key);
+      if (!ok) { alert('Could not update this session. Please try again.'); b.disabled=false; }
+      await renderSessions(dateStr);
+    });
+    wrap.appendChild(row);
+  });
+}
+
+function fmtDate(str){ const [y,m,d]=str.split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'}); }
+function sessName(k){ return (SESSIONS.find(s=>s.key===k)||{}).name || k; }
+
+async function renderBookings(){
+  const wrap = $('bookingList'); wrap.innerHTML = '<p class="text-sm text-charcoal/50">Loading…</p>';
+  const rows = await listBookings();
+  if (!rows.length) { wrap.innerHTML = '<p class="text-sm text-charcoal/55">No booking requests yet.</p>'; return; }
+  wrap.innerHTML = '';
+  rows.forEach(b => {
+    const el = document.createElement('div');
+    el.className = 'border rounded p-3'; el.style.borderColor = 'rgba(74,21,75,.14)';
+    const guests = b.guests ? ` · ${b.guests} guests` : '';
+    el.innerHTML = `
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <div class="font-serif font-700 text-regal">${fmtDate(b.event_date)} · ${sessName(b.session)}</div>
+          <div class="text-sm text-charcoal/80">${b.name} — ${b.event_type||'—'}${guests}</div>
+          <div class="text-xs text-charcoal/60 mt-0.5">${b.email}${b.phone?' · '+b.phone:''}</div>
+        </div>
+        <span class="pill pill-${b.status}">${b.status}</span>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button class="btn btn-purple text-xs confirm" ${b.status==='confirmed'?'disabled':''}>Confirm &amp; reserve</button>
+        <button class="btn btn-ghost text-xs decline" ${b.status==='declined'?'disabled':''}>Decline</button>
+      </div>`;
+    el.querySelector('.confirm').addEventListener('click', async (ev)=>{
+      ev.currentTarget.disabled=true;
+      await setBookingStatus(b.id,'confirmed');
+      await reserveSlot(b.event_date, b.session);
+      await renderBookings();
+      if ($('sessDate').value === b.event_date) await renderSessions(b.event_date);
+    });
+    el.querySelector('.decline').addEventListener('click', async (ev)=>{
+      ev.currentTarget.disabled=true; await setBookingStatus(b.id,'declined'); await renderBookings();
+    });
+    wrap.appendChild(el);
+  });
+}
+
+/* ======================= Wire up ======================= */
+$('loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  $('loginError').classList.add('hidden');
+  const btn=$('loginBtn'); btn.disabled=true; btn.textContent='Signing in…';
+  try { currentUser = await signIn($('email').value.trim(), $('password').value); await enterDashboard(); }
+  catch (err) { $('loginError').textContent = err.message; $('loginError').classList.remove('hidden'); }
+  finally { btn.disabled=false; btn.textContent='Sign in'; }
+});
+$('showSignup').addEventListener('click', ()=> $('signupForm').classList.toggle('hidden'));
+$('signupForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  $('loginError').classList.add('hidden');
+  const btn=$('signupBtn'); btn.disabled=true; btn.textContent='Creating…';
+  try { currentUser = await signUp($('email').value.trim(), $('password').value, $('suName').value.trim()); await enterDashboard(); }
+  catch (err) { $('loginError').textContent = err.message; $('loginError').classList.remove('hidden'); }
+  finally { btn.disabled=false; btn.textContent='Create account'; }
+});
+$('signOutBtn').addEventListener('click', async ()=>{ await signOut(); showLogin(); });
+$('sessDate').addEventListener('change', e => renderSessions(e.target.value));
+$('refreshBookings').addEventListener('click', renderBookings);
+$('recheckAdmin').addEventListener('click', enterDashboard);
+$('copySql').addEventListener('click', ()=>{ navigator.clipboard.writeText($('bootstrapSql').textContent).then(()=>{ $('copySql').textContent='Copied'; setTimeout(()=>$('copySql').textContent='Copy SQL',1500); }); });
+
+/* Resume an existing session on load */
+(async ()=>{ currentUser = await currentSession(); if (currentUser) await enterDashboard(); else showLogin(); })();
+</script>
+</body>
+</html>

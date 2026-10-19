@@ -665,6 +665,10 @@ const VENUE_NAME      = 'Status Building Event Center';
 const VENUE_LOCATION  = 'Status Building Event Center, Sierra Leone Grammar School compound, Murray Town, Freetown, Sierra Leone';
 const VENUE_GEO       = '8.493829;-13.2673'; // lat;lon for the .ics GEO field
 
+/* ---- Neon Data API: live availability + bookings (managed from admin.html) ---- */
+const NEON_DATA_API = 'https://ep-wild-flower-b5u5zffr.apirest.c-7.us-east-2.aws.neon.tech/neondb/rest/v1';
+const NEON_AUTH     = 'https://ep-wild-flower-b5u5zffr.neonauth.c-7.us-east-2.aws.neon.tech/neondb/auth';
+
 /* ---------- Nav scroll + mobile menu ---------- */
 const nav = document.getElementById('nav');
 const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 40);
@@ -704,10 +708,36 @@ let viewM = today.getMonth();
 let selected = null; // Date
 let chosenSession = null;
 
-// deterministic availability so the demo is stable
+/* ---- Live availability from Neon ----
+   reservedSet holds "YYYY-MM-DD|session" keys for sessions the admin has closed.
+   A session is reserved only if it's in that set; everything else is open. */
+let reservedSet = new Set();
+let _anonTok = null, _anonExp = 0;
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+async function anonToken(){
+  const now = Date.now()/1000;
+  if (_anonTok && now < _anonExp - 60) return _anonTok;
+  const r = await fetch(NEON_AUTH + '/token/anonymous');
+  if (!r.ok) throw new Error('anon token ' + r.status);
+  const j = await r.json();
+  _anonTok = j.token; _anonExp = j.expires_at || (now + 3000);
+  return _anonTok;
+}
+async function loadReserved(){
+  try {
+    const tok = await anonToken();
+    const r = await fetch(NEON_DATA_API + '/availability?select=event_date,session', { headers:{ Authorization:'Bearer '+tok } });
+    if (!r.ok) throw new Error('availability ' + r.status);
+    const rows = await r.json();
+    reservedSet = new Set(rows.map(x => x.event_date + '|' + x.session));
+    renderCalendar();
+    if (selected) renderSessions();
+  } catch (e) { console.warn('Could not load live availability:', e); } // fall back to all-open
+}
+
 function statusFor(d, i){
-  const seed = (d.getFullYear()*372 + (d.getMonth()+1)*31 + d.getDate())*3 + i*7;
-  return (Math.abs(Math.sin(seed)) > 0.66) ? 'taken' : 'avail';
+  return reservedSet.has(ymd(d) + '|' + SESSIONS[i].key) ? 'taken' : 'avail';
 }
 function dayState(d){
   if (d < today) return 'past';
@@ -891,6 +921,28 @@ bookingForm.addEventListener('submit', async (e) => {
   formError.classList.add('hidden');
   const original = submitBtn.textContent;
   submitBtn.disabled = true; submitBtn.textContent = 'Sending…';
+
+  // 1) Save the enquiry to Neon — this is the record the events team confirms.
+  let savedToNeon = false;
+  try {
+    const tok = await anonToken();
+    const r = await fetch(NEON_DATA_API + '/bookings', {
+      method:'POST',
+      headers:{ Authorization:'Bearer '+tok, 'Content-Type':'application/json', Prefer:'return=minimal' },
+      body: JSON.stringify({
+        event_date: ymd(selected),
+        session: chosenSession.key,
+        name: data.Name, email: data.Email, phone: data.Phone,
+        event_type: data['Event type'],
+        guests: data['Expected guests']==='Not specified' ? null : (parseInt(data['Expected guests'],10) || null),
+      }),
+    });
+    savedToNeon = r.ok;
+    if(!savedToNeon) console.warn('Neon booking insert HTTP', r.status);
+  } catch (e) { console.warn('Neon booking insert failed:', e); }
+
+  // 2) Email a notification as well (best effort).
+  let emailed = false;
   try {
     const res = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(BOOKING_EMAIL), {
       method:'POST',
@@ -902,14 +954,16 @@ bookingForm.addEventListener('submit', async (e) => {
         ...data,
       }),
     });
-    if(!res.ok) throw new Error('HTTP '+res.status);
+    emailed = res.ok;
+  } catch (e) { /* ignore — Neon is the system of record */ }
+
+  if (savedToNeon || emailed) {
     showConfirmation(data.Name);
-  } catch (err) {
+  } else {
     formError.innerHTML = `We couldn't send your request just now. Please try again, or email us directly at <a class="underline font-600" href="${mailtoFallback(data)}">${BOOKING_EMAIL}</a>.`;
     formError.classList.remove('hidden');
-  } finally {
-    submitBtn.disabled = false; submitBtn.textContent = original;
   }
+  submitBtn.disabled = false; submitBtn.textContent = original;
 });
 
 document.getElementById('newBooking').addEventListener('click', () => {
@@ -921,6 +975,8 @@ document.getElementById('newBooking').addEventListener('click', () => {
 });
 
 renderCalendar();
+loadReserved();                 // pull live reserved sessions from Neon, then re-render
+setInterval(loadReserved, 120000); // keep availability fresh every 2 min
 </script>
 </body>
 </html>
