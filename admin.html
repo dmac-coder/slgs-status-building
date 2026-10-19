@@ -104,7 +104,8 @@
 
   <!-- ===== Dashboard ===== -->
   <section id="dashView" class="hidden">
-    <div id="whoami" class="text-sm text-charcoal/70 mb-4"></div>
+    <div id="whoami" class="text-sm text-charcoal/70 mb-1"></div>
+    <div id="myTasks" class="text-sm text-charcoal/55 mb-4"></div>
 
     <!-- not-staff notice -->
     <div id="notStaff" class="hidden card p-5 mb-6 border-l-4 border-gold">
@@ -128,6 +129,7 @@
         <button class="tab" data-tab="bookings">Bookings</button>
         <button id="reportTab" class="tab hidden" data-tab="report">Report</button>
         <button id="staffTab" class="tab hidden" data-tab="staff">Staff</button>
+        <button id="auditTab" class="tab hidden" data-tab="audit">Audit log</button>
       </div>
 
       <!-- Calendar -->
@@ -179,7 +181,7 @@
               <button id="repRefresh" class="btn btn-ghost text-sm">Refresh</button>
             </div>
           </div>
-          <div id="repKpis" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7"></div>
+          <div id="repKpis" class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-7"></div>
           <div class="grid lg:grid-cols-2 gap-7">
             <div><h3 class="font-serif text-regal font-700 mb-3">Payments</h3><div id="repPay"></div></div>
             <div><h3 class="font-serif text-regal font-700 mb-3">Bookings by status</h3><div id="repStatus"></div></div>
@@ -210,6 +212,22 @@
               <button id="addStaffBtn" type="submit" class="btn btn-purple w-full">Add staff member</button>
             </form>
           </div>
+        </div>
+        <div class="card p-5 sm:p-6 mt-6">
+          <h2 class="text-regal text-lg font-700 mb-1">Role tasks</h2>
+          <p class="text-xs text-charcoal/60 mb-4">Define each role's responsibilities. Visible to all staff; editable by admins.</p>
+          <div id="roleTasks" class="space-y-5"></div>
+        </div>
+      </div>
+
+      <!-- Audit log -->
+      <div id="tab-audit" class="tabpane hidden">
+        <div class="card p-5 sm:p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-regal text-lg font-700">Audit log</h2>
+            <button id="auditRefresh" class="btn btn-ghost text-sm">Refresh</button>
+          </div>
+          <div id="auditList" class="space-y-1 max-h-[36rem] overflow-y-auto"></div>
         </div>
       </div>
     </div>
@@ -263,6 +281,12 @@ async function listBookings(filter){ let q='/bookings?select=*&order=created_at.
 async function patchBooking(id,fields){ const r=await api('/bookings?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(fields)}); return r.ok; }
 async function allPaymentsGrouped(){ const r=await api('/payments?select=*&order=created_at.asc'); if(!r.ok) return {}; const g={}; (await r.json()).forEach(p=>{ (g[p.booking_id]=g[p.booking_id]||[]).push(p); }); return g; }
 async function addPayment(booking_id,amount,receipt_number){ const r=await api('/payments',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({booking_id,amount,receipt_number:receipt_number||null})}); return r.ok; }
+async function setDeposit(id,amount){ return (await api('/bookings?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({security_deposit:amount})})).ok; }
+async function approveRefund(id,comment){ return (await api('/bookings?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({refund_status:'approved',refund_comment:comment,refund_by:currentUser.email,refund_at:new Date().toISOString()})})).ok; }
+async function listAudit(){ const r=await api('/audit_log?select=*&order=created_at.desc&limit=200'); return r.ok?await r.json():[]; }
+async function listRoleTasks(){ const r=await api('/role_tasks?select=*'); return r.ok?await r.json():[]; }
+async function saveRoleTask(role,tasks){ return (await api('/role_tasks?role=eq.'+role,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({tasks,updated_at:new Date().toISOString()})})).ok; }
+async function reservedList(){ const r=await api('/availability?select=event_date'); return r.ok?await r.json():[]; }
 async function listStaff(){ const r=await api('/admins?select=*&order=created_at.asc'); return r.ok?await r.json():[]; }
 async function addStaff(user_id,role,label){ const r=await api('/admins',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({user_id,role,label})}); return r.ok; }
 async function updateStaff(user_id,fields){ const r=await api('/admins?user_id=eq.'+encodeURIComponent(user_id),{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(fields)}); return r.ok; }
@@ -288,7 +312,9 @@ async function enterDashboard(){
   $('roleBadge').textContent = ROLE_LABEL[myRole] || myRole;
   $('reportTab').classList.toggle('hidden', !canReports());
   $('staffTab').classList.toggle('hidden', !isAdminRole());
+  $('auditTab').classList.toggle('hidden', !isAdminRole());
   $('calHint').textContent = canSessions() ? 'Click a session to open/close it.' : 'View only (your role can’t change sessions).';
+  try { const rt=(await listRoleTasks()).find(r=>r.role===myRole); $('myTasks').textContent = rt&&rt.tasks ? 'Your responsibilities: '+rt.tasks : ''; } catch {}
   renderCalendar(); refreshBell();
 }
 
@@ -380,6 +406,23 @@ async function renderBookings(){
           ${bal>0?`<button class="btn btn-gold text-sm payBal">Pay balance (${money(bal)})</button>`:''}
         </div>
       </div>` : `<div class="mt-3 pt-3 border-t border-black/5"><div class="text-[.7rem] font-700 uppercase tracking-wide text-regal mb-1">Payment</div>${summary}${listHtml}</div>`;
+    const dep=b.security_deposit!=null?Number(b.security_deposit):null;
+    const refundPill = b.refund_status==='approved' ? '<span class="pill pill-full">Refunded</span>' : (dep?'<span class="pill pill-part">Held</span>':'');
+    const depBlock = canPay ? `
+      <div class="mt-3 pt-3 border-t border-black/5">
+        <div class="text-[.7rem] font-700 uppercase tracking-wide text-regal mb-2">Security deposit (refundable)</div>
+        <div class="flex flex-wrap items-end gap-2">
+          <div><label>Deposit amount</label><input class="pdep text-sm !w-32" type="number" step="0.01" value="${b.security_deposit??''}" placeholder="held"></div>
+          <button class="btn btn-ghost text-sm saveDep">Set deposit</button>
+          ${dep?`<span class="text-sm">Status: ${refundPill}</span>`:''}
+        </div>
+        ${dep && b.refund_status!=='approved' ? `
+          <div class="mt-2">
+            <label>Refund comment (required to approve)</label>
+            <textarea class="rcomment text-sm" rows="2" placeholder="Condition of the hall, deductions, reason…"></textarea>
+            <button class="btn btn-purple text-sm mt-2 approveRef">Approve deposit refund (${money(dep)})</button>
+          </div>` : (b.refund_status==='approved' ? `<div class="text-xs text-charcoal/70 mt-2">Refund of ${money(dep)} approved${b.refund_by?' by '+b.refund_by:''}${b.refund_at?' · '+fmtTs(b.refund_at):''}${b.refund_comment?' — “'+b.refund_comment+'”':''}</div>`:'')}
+      </div>` : (dep ? `<div class="mt-3 pt-3 border-t border-black/5 text-sm"><span class="text-[.7rem] font-700 uppercase tracking-wide text-regal">Deposit</span> ${money(dep)} · ${b.refund_status==='approved'?'Refunded':'Held'}</div>` : '');
     el.innerHTML=`
       <div class="flex items-start justify-between gap-2">
         <div>
@@ -397,7 +440,7 @@ async function renderBookings(){
         <button class="btn btn-purple text-xs confirm" ${b.status==='confirmed'?'disabled':''}>Confirm &amp; reserve</button>
         <button class="btn btn-ghost text-xs decline" ${b.status==='declined'?'disabled':''}>Decline</button>
       </div>`:''}
-      ${payBlock}`;
+      ${payBlock}${depBlock}`;
     if(canConfirm){
       el.querySelector('.confirm').addEventListener('click', async ev=>{ ev.currentTarget.disabled=true; await patchBooking(b.id,{status:'confirmed'}); await reserveSlot(b.event_date,b.session); renderBookings(); });
       el.querySelector('.decline').addEventListener('click', async ev=>{ ev.currentTarget.disabled=true; await patchBooking(b.id,{status:'declined'}); renderBookings(); });
@@ -407,6 +450,8 @@ async function renderBookings(){
       const doPay=async amt=>{ const rc=el.querySelector('.prcpt').value.trim(); if(!(amt>0)){ alert('Enter a payment amount greater than 0.'); return; } const ok=await addPayment(b.id,amt,rc); if(!ok) alert('Could not record payment.'); renderBookings(); };
       el.querySelector('.recPay').addEventListener('click', ()=> doPay(Number(el.querySelector('.pamt').value)));
       const pb=el.querySelector('.payBal'); if(pb) pb.addEventListener('click', ()=> doPay(bal));
+      const sd=el.querySelector('.saveDep'); if(sd) sd.addEventListener('click', async ()=>{ const v=el.querySelector('.pdep').value; sd.disabled=true; const ok=await setDeposit(b.id, v===''?null:Number(v)); if(!ok) alert('Could not set deposit.'); renderBookings(); });
+      const ar=el.querySelector('.approveRef'); if(ar) ar.addEventListener('click', async ()=>{ const c=el.querySelector('.rcomment').value.trim(); if(!c){ alert('Please enter a comment before approving the refund.'); return; } ar.disabled=true; const ok=await approveRefund(b.id,c); if(!ok) alert('Could not approve refund.'); renderBookings(); });
     }
     wrap.appendChild(el);
   });
@@ -438,9 +483,37 @@ async function renderStaff(){
   });
 }
 
+/* ---- Role tasks ---- */
+async function renderRoleTasks(){
+  const wrap=$('roleTasks'); wrap.innerHTML='<p class="text-sm text-charcoal/50">Loading…</p>';
+  const map={}; (await listRoleTasks()).forEach(r=>map[r.role]=r.tasks);
+  wrap.innerHTML='';
+  [['admin','Administrator'],['finance','Finance Officer'],['estate','Estate Officer']].forEach(([role,label])=>{
+    const el=document.createElement('div');
+    el.innerHTML=`<label class="!text-sm">${label}</label>
+      <textarea class="rt text-sm" rows="2" ${isAdminRole()?'':'readonly'}>${(map[role]||'').replace(/</g,'&lt;')}</textarea>
+      ${isAdminRole()?'<button class="btn btn-ghost text-sm mt-1 saveRt">Save</button>':''}`;
+    const btn=el.querySelector('.saveRt');
+    if(btn) btn.addEventListener('click', async ()=>{ btn.disabled=true; btn.textContent='Saving…'; const ok=await saveRoleTask(role, el.querySelector('.rt').value); btn.textContent=ok?'Saved':'Error'; setTimeout(()=>{btn.disabled=false;btn.textContent='Save';},1200); });
+    wrap.appendChild(el);
+  });
+}
+
+/* ---- Audit log ---- */
+async function renderAudit(){
+  const wrap=$('auditList'); wrap.innerHTML='<p class="text-sm text-charcoal/50">Loading…</p>';
+  const rows=await listAudit(); wrap.innerHTML='';
+  if(!rows.length){ wrap.innerHTML='<p class="text-sm text-charcoal/55">No activity yet.</p>'; return; }
+  rows.forEach(a=>{
+    const el=document.createElement('div'); el.className='flex items-start justify-between gap-3 py-2 border-b border-black/5 text-sm';
+    el.innerHTML=`<div class="min-w-0"><span class="font-600 text-regal">${a.actor_label||a.actor_user_id||'—'}</span> <span class="text-charcoal/75">${a.detail||a.action}</span><div class="text-[.62rem] text-charcoal/40 uppercase tracking-wide">${a.action}</div></div><div class="text-[.66rem] text-charcoal/45 whitespace-nowrap shrink-0">${fmtTs(a.created_at)}</div>`;
+    wrap.appendChild(el);
+  });
+}
+
 /* ---- Report ---- */
 const money = n => CURRENCY + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
-let _repBookings = [], _repPayments = [];
+let _repBookings = [], _repPayments = [], _repReserved = [];
 function inPeriod(rows, period){
   if(period==='all') return rows;
   const now=new Date();
@@ -460,6 +533,7 @@ async function renderReport(){
   _repBookings = await listBookings('');
   const r = await api('/payments?select=*&order=created_at.desc');
   _repPayments = r.ok ? await r.json() : [];
+  _repReserved = await reservedList();
   drawReport();
 }
 function drawReport(){
@@ -467,6 +541,9 @@ function drawReport(){
   const revenue = rows.reduce((s,b)=>s+(Number(b.amount_paid)||0),0);
   const outstanding = rows.filter(b=>b.status!=='declined' && b.amount_due!=null)
                           .reduce((s,b)=>s+Math.max(0, Number(b.amount_due)-(Number(b.amount_paid)||0)),0);
+  const pendingRefunds = rows.filter(b=>b.status!=='declined' && b.security_deposit && b.refund_status!=='approved')
+                             .reduce((s,b)=>s+Number(b.security_deposit),0);
+  const reservedCount = inPeriod(_repReserved, $('repPeriod').value).length;
   const full = rows.filter(b=>b.payment_status==='full');
   const part = rows.filter(b=>b.payment_status==='part');
   const confirmed = rows.filter(b=>b.status==='confirmed');
@@ -477,10 +554,11 @@ function drawReport(){
   $('repKpis').innerHTML = [
     ['Revenue collected', money(revenue), 1],
     ['Outstanding balance', money(outstanding), 0],
+    ['Pending refunds', money(pendingRefunds), 0],
     ['Confirmed bookings', confirmed.length, 0],
     ['Pending requests', pending.length, 0],
   ].map(([label,val,hi])=>`<div class="rounded p-4 ${hi?'bg-regal':'bg-tint'}">
-     <div class="font-serif font-700 ${hi?'text-gold text-2xl':'text-regal text-2xl'}">${val}</div>
+     <div class="font-serif font-700 ${hi?'text-gold text-xl':'text-regal text-xl'}">${val}</div>
      <div class="text-xs ${hi?'text-cream/70':'text-charcoal/60'} mt-1">${label}</div></div>`).join('');
 
   const fullSum = full.reduce((s,b)=>s+(Number(b.amount_paid)||0),0);
@@ -493,7 +571,7 @@ function drawReport(){
      <div class="flex justify-between pt-2 border-t border-black/5 font-700 text-regal"><span>Total collected</span><span>${money(revenue)}</span></div>
    </div>`;
 
-  $('repStatus').innerHTML = bars([['Pending',pending.length,'#D4AF37'],['Confirmed',confirmed.length,'#4A154B'],['Declined',declined.length,'#b199b4']]);
+  $('repStatus').innerHTML = bars([['Pending',pending.length,'#D4AF37'],['Confirmed',confirmed.length,'#4A154B'],['Declined',declined.length,'#b199b4'],['Reserved sessions',reservedCount,'#8a4f90']]);
 
   const byMonth={};
   rows.forEach(b=>{ const d=new Date(b.event_date+'T00:00:00'); const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); (byMonth[k]=byMonth[k]||{c:0,r:0}); byMonth[k].c++; byMonth[k].r+=Number(b.amount_paid)||0; });
@@ -563,7 +641,8 @@ document.querySelectorAll('.tab[data-tab]').forEach(t=> t.addEventListener('clic
   $('tab-'+name).classList.remove('hidden');
   if(name==='bookings') renderBookings();
   if(name==='report') renderReport();
-  if(name==='staff') renderStaff();
+  if(name==='staff'){ renderStaff(); renderRoleTasks(); }
+  if(name==='audit') renderAudit();
   if(name==='calendar') renderCalendar();
 }));
 // calendar controls
@@ -578,6 +657,8 @@ $('bookFilter').addEventListener('change', renderBookings);
 $('repPeriod').addEventListener('change', drawReport);
 $('repRefresh').addEventListener('click', renderReport);
 $('repExport').addEventListener('click', exportReportCSV);
+// audit
+$('auditRefresh').addEventListener('click', renderAudit);
 // staff add
 $('addStaffForm').addEventListener('submit', async e=>{ e.preventDefault(); $('staffError').classList.add('hidden'); const b=$('addStaffBtn'); b.disabled=true; b.textContent='Adding…';
   const ok=await addStaff($('sfId').value.trim(),$('sfRole').value,$('sfLabel').value.trim());
