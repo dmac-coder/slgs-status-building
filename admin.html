@@ -126,6 +126,7 @@
       <div class="flex items-center gap-2 mb-6 flex-wrap">
         <button class="tab active" data-tab="calendar">Calendar</button>
         <button class="tab" data-tab="bookings">Bookings</button>
+        <button id="reportTab" class="tab hidden" data-tab="report">Report</button>
         <button id="staffTab" class="tab hidden" data-tab="staff">Staff</button>
       </div>
 
@@ -167,6 +168,28 @@
         </div>
       </div>
 
+      <!-- Report -->
+      <div id="tab-report" class="tabpane hidden">
+        <div class="card p-5 sm:p-6">
+          <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
+            <h2 class="text-regal text-lg font-700">Revenue &amp; bookings report</h2>
+            <div class="flex items-center gap-2">
+              <select id="repPeriod" class="!w-auto text-sm"><option value="all">All time</option><option value="year">This year</option><option value="month">This month</option></select>
+              <button id="repExport" class="btn btn-ghost text-sm">Export CSV</button>
+              <button id="repRefresh" class="btn btn-ghost text-sm">Refresh</button>
+            </div>
+          </div>
+          <div id="repKpis" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7"></div>
+          <div class="grid lg:grid-cols-2 gap-7">
+            <div><h3 class="font-serif text-regal font-700 mb-3">Payments</h3><div id="repPay"></div></div>
+            <div><h3 class="font-serif text-regal font-700 mb-3">Bookings by status</h3><div id="repStatus"></div></div>
+          </div>
+          <div class="mt-7"><h3 class="font-serif text-regal font-700 mb-3">Revenue by month</h3><div id="repMonthly"></div></div>
+          <div class="mt-7"><h3 class="font-serif text-regal font-700 mb-3">By event type</h3><div id="repTypes"></div></div>
+          <div class="mt-7"><h3 class="font-serif text-regal font-700 mb-3">Receipts &amp; payments</h3><div id="repReceipts" class="overflow-x-auto"></div></div>
+        </div>
+      </div>
+
       <!-- Staff -->
       <div id="tab-staff" class="tabpane hidden">
         <div class="grid lg:grid-cols-2 gap-6">
@@ -199,12 +222,14 @@ const NEON_DATA_API = 'https://ep-wild-flower-b5u5zffr.apirest.c-7.us-east-2.aws
 const NEON_AUTH     = 'https://ep-wild-flower-b5u5zffr.neonauth.c-7.us-east-2.aws.neon.tech/neondb/auth';
 const SESSIONS = [ { key:'daytime', name:'Daytime', short:'D' }, { key:'evening', name:'Evening', short:'E' } ];
 const ROLE_LABEL = { admin:'Administrator', finance:'Finance Officer', estate:'Estate Officer' };
+const CURRENCY = 'Le ';   // ← change to your currency symbol (e.g. 'NLe ', '$', '£')
 
 /* ======================= Auth ======================= */
 let jwt=null, jwtExp=0, currentUser=null, myRole=null;
 const canSessions = () => myRole==='admin' || myRole==='estate';
 const canPayments = () => myRole==='admin' || myRole==='finance';
 const isAdminRole = () => myRole==='admin';
+const canReports  = () => myRole==='admin' || myRole==='finance';
 const $ = id => document.getElementById(id);
 
 async function getJWT(force){
@@ -259,6 +284,7 @@ async function enterDashboard(){
   }
   $('notStaff').classList.add('hidden'); $('tools').classList.remove('hidden');
   $('roleBadge').textContent = ROLE_LABEL[myRole] || myRole;
+  $('reportTab').classList.toggle('hidden', !canReports());
   $('staffTab').classList.toggle('hidden', !isAdminRole());
   $('calHint').textContent = canSessions() ? 'Click a session to open/close it.' : 'View only (your role can’t change sessions).';
   renderCalendar(); refreshBell();
@@ -402,6 +428,87 @@ async function renderStaff(){
   });
 }
 
+/* ---- Report ---- */
+const money = n => CURRENCY + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+let _repBookings = [];
+function inPeriod(rows, period){
+  if(period==='all') return rows;
+  const now=new Date();
+  return rows.filter(b=>{ const d=new Date(b.event_date+'T00:00:00');
+    if(period==='year')  return d.getFullYear()===now.getFullYear();
+    if(period==='month') return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+    return true; });
+}
+function bars(items, color='#4A154B'){
+  const max=Math.max(1,...items.map(i=>i[1]));
+  return '<div class="space-y-1.5 text-sm">'+items.map(([label,n,c])=>`<div class="flex items-center gap-3">
+    <div class="w-28 shrink-0 text-charcoal/70 truncate">${label}</div>
+    <div class="flex-1 bg-tint rounded h-5"><div class="h-5 rounded" style="width:${Math.round(n/max*100)}%;background:${c||color}"></div></div>
+    <div class="w-10 text-right">${n}</div></div>`).join('')+'</div>';
+}
+async function renderReport(){ _repBookings = await listBookings(''); drawReport(); }
+function drawReport(){
+  const rows = inPeriod(_repBookings, $('repPeriod').value);
+  const revenue = rows.reduce((s,b)=>s+(Number(b.amount_paid)||0),0);
+  const full = rows.filter(b=>b.payment_status==='full');
+  const part = rows.filter(b=>b.payment_status==='part');
+  const confirmed = rows.filter(b=>b.status==='confirmed');
+  const pending   = rows.filter(b=>b.status==='pending');
+  const declined  = rows.filter(b=>b.status==='declined');
+  const unpaidConf = confirmed.filter(b=>b.payment_status==='unpaid');
+
+  $('repKpis').innerHTML = [
+    ['Revenue collected', money(revenue), 1],
+    ['Confirmed bookings', confirmed.length, 0],
+    ['Pending requests', pending.length, 0],
+    ['Awaiting payment', unpaidConf.length, 0],
+  ].map(([label,val,hi])=>`<div class="rounded p-4 ${hi?'bg-regal':'bg-tint'}">
+     <div class="font-serif font-700 ${hi?'text-gold text-2xl':'text-regal text-3xl'}">${val}</div>
+     <div class="text-xs ${hi?'text-cream/70':'text-charcoal/60'} mt-1">${label}</div></div>`).join('');
+
+  const fullSum = full.reduce((s,b)=>s+(Number(b.amount_paid)||0),0);
+  const partSum = part.reduce((s,b)=>s+(Number(b.amount_paid)||0),0);
+  const pr=(l,n,a)=>`<div class="flex justify-between"><span class="text-charcoal/75">${l} <span class="text-charcoal/45">(${n})</span></span><span>${a}</span></div>`;
+  $('repPay').innerHTML = `<div class="space-y-2 text-sm">
+     ${pr('Full payments', full.length, money(fullSum))}
+     ${pr('Part payments', part.length, money(partSum))}
+     ${pr('Unpaid (confirmed)', unpaidConf.length, '—')}
+     <div class="flex justify-between pt-2 border-t border-black/5 font-700 text-regal"><span>Total collected</span><span>${money(revenue)}</span></div>
+   </div>`;
+
+  $('repStatus').innerHTML = bars([['Pending',pending.length,'#D4AF37'],['Confirmed',confirmed.length,'#4A154B'],['Declined',declined.length,'#b199b4']]);
+
+  const byMonth={};
+  rows.forEach(b=>{ const d=new Date(b.event_date+'T00:00:00'); const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); (byMonth[k]=byMonth[k]||{c:0,r:0}); byMonth[k].c++; byMonth[k].r+=Number(b.amount_paid)||0; });
+  const months=Object.keys(byMonth).sort(); const maxR=Math.max(1,...months.map(m=>byMonth[m].r));
+  $('repMonthly').innerHTML = months.length ? '<div class="space-y-1.5">'+months.map(m=>{
+      const o=byMonth[m], label=new Date(m+'-01T00:00:00').toLocaleDateString(undefined,{month:'short',year:'numeric'});
+      return `<div class="flex items-center gap-3 text-sm">
+        <div class="w-24 shrink-0 text-charcoal/70">${label}</div>
+        <div class="flex-1 bg-tint rounded h-5"><div class="bg-gold h-5 rounded" style="width:${Math.round(o.r/maxR*100)}%"></div></div>
+        <div class="w-32 text-right">${money(o.r)}</div>
+        <div class="w-16 text-right text-charcoal/50">${o.c} bkg</div></div>`;
+    }).join('')+'</div>' : '<p class="text-sm text-charcoal/50">No data for this period.</p>';
+
+  const byType={}; rows.forEach(b=>{ const t=b.event_type||'—'; byType[t]=(byType[t]||0)+1; });
+  const typeEntries=Object.entries(byType).sort((a,b)=>b[1]-a[1]);
+  $('repTypes').innerHTML = typeEntries.length ? bars(typeEntries.map(([t,n])=>[t,n])) : '<p class="text-sm text-charcoal/50">No data.</p>';
+
+  const recs = rows.filter(b=>b.amount_paid || b.receipt_number).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  $('repReceipts').innerHTML = recs.length ? `<table class="w-full text-sm border-collapse">
+     <thead><tr class="text-left text-xs text-charcoal/55 border-b"><th class="py-2 pr-3">Receipt</th><th class="pr-3">Name</th><th class="pr-3">Event date</th><th class="pr-3">Payment</th><th class="text-right">Amount</th></tr></thead>
+     <tbody>${recs.map(b=>`<tr class="border-b border-black/5"><td class="py-2 pr-3">${b.receipt_number||'—'}</td><td class="pr-3">${b.name}</td><td class="pr-3">${fmtDate(b.event_date)}</td><td class="pr-3"><span class="pill pill-${b.payment_status}">${b.payment_status}</span></td><td class="text-right">${money(b.amount_paid||0)}</td></tr>`).join('')}</tbody>
+   </table>` : '<p class="text-sm text-charcoal/50">No payments recorded yet.</p>';
+}
+function exportReportCSV(){
+  const rows = inPeriod(_repBookings, $('repPeriod').value);
+  const cols=['created_at','event_date','session','name','email','phone','event_type','guests','status','payment_status','amount_paid','receipt_number'];
+  const esc=v=>{ v=(v==null?'':String(v)); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+  const csv=[cols.join(',')].concat(rows.map(b=>cols.map(c=>esc(b[c])).join(','))).join('\n');
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  const a=document.createElement('a'); a.href=url; a.download='sbec-report-'+$('repPeriod').value+'-'+ymd(new Date())+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+
 /* ---- Notifications ---- */
 async function refreshBell(){
   const items=await listNotifications();
@@ -436,6 +543,7 @@ document.querySelectorAll('.tab[data-tab]').forEach(t=> t.addEventListener('clic
   document.querySelectorAll('.tabpane').forEach(p=>p.classList.add('hidden'));
   $('tab-'+name).classList.remove('hidden');
   if(name==='bookings') renderBookings();
+  if(name==='report') renderReport();
   if(name==='staff') renderStaff();
   if(name==='calendar') renderCalendar();
 }));
@@ -447,6 +555,10 @@ $('calNext').addEventListener('click', ()=>{ if(calMode==='month') calAnchor.set
 // bookings controls
 $('refreshBookings').addEventListener('click', renderBookings);
 $('bookFilter').addEventListener('change', renderBookings);
+// report controls
+$('repPeriod').addEventListener('change', drawReport);
+$('repRefresh').addEventListener('click', renderReport);
+$('repExport').addEventListener('click', exportReportCSV);
 // staff add
 $('addStaffForm').addEventListener('submit', async e=>{ e.preventDefault(); $('staffError').classList.add('hidden'); const b=$('addStaffBtn'); b.disabled=true; b.textContent='Adding…';
   const ok=await addStaff($('sfId').value.trim(),$('sfRole').value,$('sfLabel').value.trim());
