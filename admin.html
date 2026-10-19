@@ -261,6 +261,8 @@ async function reserveSlot(dateStr,session){ const r=await api('/availability',{
 async function openSlot(dateStr,session){ const r=await api(`/availability?event_date=eq.${dateStr}&session=eq.${session}`,{method:'DELETE',headers:{Prefer:'return=minimal'}}); return r.ok; }
 async function listBookings(filter){ let q='/bookings?select=*&order=created_at.desc'; if(filter) q+=`&status=eq.${filter}`; const r=await api(q); return r.ok?await r.json():[]; }
 async function patchBooking(id,fields){ const r=await api('/bookings?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(fields)}); return r.ok; }
+async function allPaymentsGrouped(){ const r=await api('/payments?select=*&order=created_at.asc'); if(!r.ok) return {}; const g={}; (await r.json()).forEach(p=>{ (g[p.booking_id]=g[p.booking_id]||[]).push(p); }); return g; }
+async function addPayment(booking_id,amount,receipt_number){ const r=await api('/payments',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({booking_id,amount,receipt_number:receipt_number||null})}); return r.ok; }
 async function listStaff(){ const r=await api('/admins?select=*&order=created_at.asc'); return r.ok?await r.json():[]; }
 async function addStaff(user_id,role,label){ const r=await api('/admins',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({user_id,role,label})}); return r.ok; }
 async function updateStaff(user_id,fields){ const r=await api('/admins?user_id=eq.'+encodeURIComponent(user_id),{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(fields)}); return r.ok; }
@@ -349,25 +351,35 @@ async function renderBookings(){
   const wrap=$('bookingList'); wrap.innerHTML='<p class="text-sm text-charcoal/50">Loading…</p>';
   const rows=await listBookings($('bookFilter').value);
   if(!rows.length){ wrap.innerHTML='<p class="text-sm text-charcoal/55">No booking requests.</p>'; return; }
+  const pays = await allPaymentsGrouped();
   wrap.innerHTML='';
   rows.forEach(b=>{
     const el=document.createElement('div'); el.className='border rounded p-3'; el.style.borderColor='rgba(74,21,75,.14)';
     const guests=b.guests?` · ${b.guests} guests`:'';
     const canConfirm=canSessions(), canPay=canPayments();
-    const payRow = canPay ? `
+    const due=b.amount_due!=null?Number(b.amount_due):null, paid=Number(b.amount_paid)||0, bal=due!=null?Math.max(0,due-paid):null;
+    const list=(pays[b.id]||[]);
+    const listHtml = list.length ? '<div class="mt-2 space-y-1">'+list.map(p=>`<div class="flex justify-between text-xs text-charcoal/70"><span>${fmtTs(p.created_at)}${p.receipt_number?' · '+p.receipt_number:''}</span><span>${money(p.amount)}</span></div>`).join('')+'</div>' : '';
+    const summary = `<div class="flex flex-wrap gap-x-4 gap-y-1 text-sm mt-2">
+        <span>Due: <strong>${due!=null?money(due):'—'}</strong></span>
+        <span>Paid: <strong>${money(paid)}</strong></span>
+        ${due!=null?`<span>Balance: <strong class="${bal>0?'text-regal':'text-green-700'}">${money(bal)}</strong></span>`:''}</div>`;
+    const payBlock = canPay ? `
       <div class="mt-3 pt-3 border-t border-black/5">
-        <div class="text-[.7rem] font-700 uppercase tracking-wide text-regal mb-2">Payment</div>
-        <div class="grid sm:grid-cols-4 gap-2 items-end">
-          <div><label>Status</label><select class="pstat text-sm">
-            <option value="unpaid"${b.payment_status==='unpaid'?' selected':''}>Unpaid</option>
-            <option value="part"${b.payment_status==='part'?' selected':''}>Part payment</option>
-            <option value="full"${b.payment_status==='full'?' selected':''}>Full payment</option>
-          </select></div>
-          <div><label>Amount paid</label><input class="pamt text-sm" type="number" step="0.01" value="${b.amount_paid??''}" placeholder="0.00"></div>
-          <div><label>Receipt no.</label><input class="prcpt text-sm" type="text" value="${b.receipt_number??''}" placeholder="e.g. RCP-0001"></div>
-          <div><button class="btn btn-purple text-sm savePay">Save payment</button></div>
+        <div class="text-[.7rem] font-700 uppercase tracking-wide text-regal mb-2">Payments</div>
+        <div class="flex flex-wrap items-end gap-2">
+          <div><label>Amount to be paid</label><input class="pdue text-sm !w-32" type="number" step="0.01" value="${b.amount_due??''}" placeholder="total"></div>
+          <button class="btn btn-ghost text-sm saveDue">Set amount due</button>
         </div>
-      </div>` : (b.payment_status!=='unpaid' ? `<div class="mt-2 text-xs text-charcoal/70">Payment: <span class="pill pill-${b.payment_status}">${b.payment_status==='part'?'Part':'Full'}</span>${b.receipt_number?` · receipt ${b.receipt_number}`:''}${b.amount_paid?` · ${b.amount_paid}`:''}</div>`:'');
+        ${summary}
+        ${listHtml}
+        <div class="flex flex-wrap items-end gap-2 mt-3">
+          <div><label>Record payment</label><input class="pamt text-sm !w-28" type="number" step="0.01" placeholder="amount"></div>
+          <div><label>Receipt no.</label><input class="prcpt text-sm !w-36" type="text" placeholder="e.g. RCP-0001"></div>
+          <button class="btn btn-purple text-sm recPay">Record payment</button>
+          ${bal>0?`<button class="btn btn-gold text-sm payBal">Pay balance (${money(bal)})</button>`:''}
+        </div>
+      </div>` : `<div class="mt-3 pt-3 border-t border-black/5"><div class="text-[.7rem] font-700 uppercase tracking-wide text-regal mb-1">Payment</div>${summary}${listHtml}</div>`;
     el.innerHTML=`
       <div class="flex items-start justify-between gap-2">
         <div>
@@ -385,18 +397,16 @@ async function renderBookings(){
         <button class="btn btn-purple text-xs confirm" ${b.status==='confirmed'?'disabled':''}>Confirm &amp; reserve</button>
         <button class="btn btn-ghost text-xs decline" ${b.status==='declined'?'disabled':''}>Decline</button>
       </div>`:''}
-      ${payRow}`;
+      ${payBlock}`;
     if(canConfirm){
       el.querySelector('.confirm').addEventListener('click', async ev=>{ ev.currentTarget.disabled=true; await patchBooking(b.id,{status:'confirmed'}); await reserveSlot(b.event_date,b.session); renderBookings(); });
       el.querySelector('.decline').addEventListener('click', async ev=>{ ev.currentTarget.disabled=true; await patchBooking(b.id,{status:'declined'}); renderBookings(); });
     }
     if(canPay){
-      el.querySelector('.savePay').addEventListener('click', async ev=>{
-        const btn=ev.currentTarget; btn.disabled=true; btn.textContent='Saving…';
-        const ps=el.querySelector('.pstat').value, amt=el.querySelector('.pamt').value, rc=el.querySelector('.prcpt').value.trim();
-        const ok=await patchBooking(b.id,{ payment_status:ps, amount_paid: amt===''?null:Number(amt), receipt_number: rc||null });
-        if(!ok){ alert('Could not save payment.'); btn.disabled=false; btn.textContent='Save payment'; } else renderBookings();
-      });
+      el.querySelector('.saveDue').addEventListener('click', async ev=>{ const v=el.querySelector('.pdue').value; ev.currentTarget.disabled=true; const ok=await patchBooking(b.id,{amount_due: v===''?null:Number(v)}); if(!ok) alert('Could not set amount due.'); renderBookings(); });
+      const doPay=async amt=>{ const rc=el.querySelector('.prcpt').value.trim(); if(!(amt>0)){ alert('Enter a payment amount greater than 0.'); return; } const ok=await addPayment(b.id,amt,rc); if(!ok) alert('Could not record payment.'); renderBookings(); };
+      el.querySelector('.recPay').addEventListener('click', ()=> doPay(Number(el.querySelector('.pamt').value)));
+      const pb=el.querySelector('.payBal'); if(pb) pb.addEventListener('click', ()=> doPay(bal));
     }
     wrap.appendChild(el);
   });
@@ -430,7 +440,7 @@ async function renderStaff(){
 
 /* ---- Report ---- */
 const money = n => CURRENCY + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
-let _repBookings = [];
+let _repBookings = [], _repPayments = [];
 function inPeriod(rows, period){
   if(period==='all') return rows;
   const now=new Date();
@@ -446,10 +456,17 @@ function bars(items, color='#4A154B'){
     <div class="flex-1 bg-tint rounded h-5"><div class="h-5 rounded" style="width:${Math.round(n/max*100)}%;background:${c||color}"></div></div>
     <div class="w-10 text-right">${n}</div></div>`).join('')+'</div>';
 }
-async function renderReport(){ _repBookings = await listBookings(''); drawReport(); }
+async function renderReport(){
+  _repBookings = await listBookings('');
+  const r = await api('/payments?select=*&order=created_at.desc');
+  _repPayments = r.ok ? await r.json() : [];
+  drawReport();
+}
 function drawReport(){
   const rows = inPeriod(_repBookings, $('repPeriod').value);
   const revenue = rows.reduce((s,b)=>s+(Number(b.amount_paid)||0),0);
+  const outstanding = rows.filter(b=>b.status!=='declined' && b.amount_due!=null)
+                          .reduce((s,b)=>s+Math.max(0, Number(b.amount_due)-(Number(b.amount_paid)||0)),0);
   const full = rows.filter(b=>b.payment_status==='full');
   const part = rows.filter(b=>b.payment_status==='part');
   const confirmed = rows.filter(b=>b.status==='confirmed');
@@ -459,11 +476,11 @@ function drawReport(){
 
   $('repKpis').innerHTML = [
     ['Revenue collected', money(revenue), 1],
+    ['Outstanding balance', money(outstanding), 0],
     ['Confirmed bookings', confirmed.length, 0],
     ['Pending requests', pending.length, 0],
-    ['Awaiting payment', unpaidConf.length, 0],
   ].map(([label,val,hi])=>`<div class="rounded p-4 ${hi?'bg-regal':'bg-tint'}">
-     <div class="font-serif font-700 ${hi?'text-gold text-2xl':'text-regal text-3xl'}">${val}</div>
+     <div class="font-serif font-700 ${hi?'text-gold text-2xl':'text-regal text-2xl'}">${val}</div>
      <div class="text-xs ${hi?'text-cream/70':'text-charcoal/60'} mt-1">${label}</div></div>`).join('');
 
   const fullSum = full.reduce((s,b)=>s+(Number(b.amount_paid)||0),0);
@@ -494,15 +511,17 @@ function drawReport(){
   const typeEntries=Object.entries(byType).sort((a,b)=>b[1]-a[1]);
   $('repTypes').innerHTML = typeEntries.length ? bars(typeEntries.map(([t,n])=>[t,n])) : '<p class="text-sm text-charcoal/50">No data.</p>';
 
-  const recs = rows.filter(b=>b.amount_paid || b.receipt_number).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  const bookMap={}; _repBookings.forEach(b=>bookMap[b.id]=b);
+  const periodIds=new Set(rows.map(b=>b.id));
+  const recs=_repPayments.filter(p=>periodIds.has(p.booking_id));
   $('repReceipts').innerHTML = recs.length ? `<table class="w-full text-sm border-collapse">
-     <thead><tr class="text-left text-xs text-charcoal/55 border-b"><th class="py-2 pr-3">Receipt</th><th class="pr-3">Name</th><th class="pr-3">Event date</th><th class="pr-3">Payment</th><th class="text-right">Amount</th></tr></thead>
-     <tbody>${recs.map(b=>`<tr class="border-b border-black/5"><td class="py-2 pr-3">${b.receipt_number||'—'}</td><td class="pr-3">${b.name}</td><td class="pr-3">${fmtDate(b.event_date)}</td><td class="pr-3"><span class="pill pill-${b.payment_status}">${b.payment_status}</span></td><td class="text-right">${money(b.amount_paid||0)}</td></tr>`).join('')}</tbody>
+     <thead><tr class="text-left text-xs text-charcoal/55 border-b"><th class="py-2 pr-3">Receipt</th><th class="pr-3">Date paid</th><th class="pr-3">Name</th><th class="pr-3">Event date</th><th class="text-right">Amount</th></tr></thead>
+     <tbody>${recs.map(p=>{ const bk=bookMap[p.booking_id]||{}; return `<tr class="border-b border-black/5"><td class="py-2 pr-3">${p.receipt_number||'—'}</td><td class="pr-3">${fmtTs(p.created_at)}</td><td class="pr-3">${bk.name||''}</td><td class="pr-3">${bk.event_date?fmtDate(bk.event_date):''}</td><td class="text-right">${money(p.amount)}</td></tr>`; }).join('')}</tbody>
    </table>` : '<p class="text-sm text-charcoal/50">No payments recorded yet.</p>';
 }
 function exportReportCSV(){
   const rows = inPeriod(_repBookings, $('repPeriod').value);
-  const cols=['created_at','event_date','session','name','email','phone','event_type','guests','status','payment_status','amount_paid','receipt_number'];
+  const cols=['created_at','event_date','session','name','email','phone','event_type','guests','status','payment_status','amount_due','amount_paid'];
   const esc=v=>{ v=(v==null?'':String(v)); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
   const csv=[cols.join(',')].concat(rows.map(b=>cols.map(c=>esc(b[c])).join(','))).join('\n');
   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
