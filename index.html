@@ -85,7 +85,27 @@
   .hero-glow {
     position:absolute; left:50%; top:30%; width:min(760px,90vw); aspect-ratio:1; transform:translate(-50%,-50%);
     background: radial-gradient(circle, rgba(212,175,55,.22), transparent 62%); pointer-events:none; filter:blur(10px);
+    z-index:2; animation: glowPulse 7.5s ease-in-out infinite;
   }
+
+  /* ---- Hero photo background + orchestrated load ---- */
+  .hero-photo {
+    position:absolute; inset:-3%; z-index:0;
+    background:url("images/slgs-campus.jpg") center 58% / cover no-repeat;
+    animation: kenburns 26s ease-in-out infinite alternate; will-change:transform;
+  }
+  .hero-overlay {
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:
+      radial-gradient(130% 80% at 50% 10%, rgba(74,21,75,.45), transparent 55%),
+      radial-gradient(120% 70% at 50% 128%, rgba(212,175,55,.16), transparent 60%),
+      linear-gradient(180deg, rgba(42,11,44,.80) 0%, rgba(54,15,56,.62) 44%, rgba(29,8,32,.93) 100%);
+  }
+  .hero-anim { opacity:0; animation-duration:1s; animation-timing-function:var(--ease); animation-fill-mode:both; }
+  @keyframes heroRise { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:none; } }
+  @keyframes heroSeal { from { opacity:0; transform:scale(.82); } to { opacity:1; transform:scale(1); } }
+  @keyframes kenburns { 0% { transform:scale(1.04); } 100% { transform:scale(1.15); } }
+  @keyframes glowPulse { 0%,100% { opacity:.5; } 50% { opacity:.92; } }
 
   /* ---- Seal (crest in a gold-ringed disc so purple logo reads on dark) ---- */
   .seal { background: #FBF9F4; border-radius:9999px; box-shadow: 0 0 0 1px rgba(212,175,55,.9), 0 0 0 6px rgba(212,175,55,.18), 0 10px 30px rgba(0,0,0,.35); }
@@ -165,7 +185,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior:auto; }
-    .reveal { opacity:1 !important; transform:none !important; transition:none; }
+    .reveal, .hero-anim { opacity:1 !important; transform:none !important; transition:none; }
     .occasion img, .gal img { transition:none; }
     * { animation:none !important; }
   }
@@ -215,30 +235,31 @@
 </header>
 
 <!-- ===================== HERO ===================== -->
-<section id="top" class="hero-bg grain relative min-h-screen flex items-center overflow-hidden">
-  <div class="hero-arches"></div>
+<section id="top" class="grain relative min-h-screen flex items-center overflow-hidden bg-regal-dark">
+  <div class="hero-photo"></div>
+  <div class="hero-overlay"></div>
   <div class="hero-glow"></div>
 
-  <div class="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 w-full pt-28 pb-20 text-center">
-    <div class="reveal flex flex-col items-center">
-      <span class="seal w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center mb-8">
+  <div class="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 w-full pt-28 pb-24 text-center">
+    <div class="flex flex-col items-center">
+      <span class="seal hero-anim w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center mb-8" style="animation-name:heroSeal;animation-delay:.1s">
         <img src="brand_assets/slgs-logo-png.png" alt="Sierra Leone Grammar School crest" class="w-16 h-16 sm:w-20 sm:h-20 object-contain" />
       </span>
 
-      <p class="kicker !text-gold-pale mb-6">Now open to the public &nbsp;·&nbsp; Est. grounds since 1845</p>
+      <p class="kicker hero-anim !text-gold-pale mb-6" style="animation-name:heroRise;animation-delay:.35s">Now open to the public &nbsp;·&nbsp; Est. grounds since 1845</p>
 
-      <h1 class="display text-cream font-700 text-[2.5rem] leading-[1.04] sm:text-6xl lg:text-7xl max-w-4xl">
+      <h1 class="display hero-anim text-cream font-700 text-[2.5rem] leading-[1.04] sm:text-6xl lg:text-7xl max-w-4xl" style="animation-name:heroRise;animation-delay:.5s">
         Status Building Event Center
       </h1>
-      <p class="font-serif italic text-gold-soft text-xl sm:text-2xl mt-5">Where every occasion becomes a milestone.</p>
+      <p class="font-serif italic hero-anim text-gold-soft text-xl sm:text-2xl mt-5" style="animation-name:heroRise;animation-delay:.68s">Where every occasion becomes a milestone.</p>
 
-      <p class="lead text-cream/80 max-w-2xl mt-7">
+      <p class="lead hero-anim text-cream/85 max-w-2xl mt-7" style="animation-name:heroRise;animation-delay:.82s">
         An elegant event hall within the historic Sierra Leone Grammar School compound — built
         for weddings, galas, conferences and celebrations worth remembering. Seats 350 guests,
         parks 200 vehicles.
       </p>
 
-      <div class="flex flex-col sm:flex-row items-center gap-4 mt-10">
+      <div class="flex flex-col sm:flex-row items-center gap-4 mt-10 hero-anim" style="animation-name:heroRise;animation-delay:.98s">
         <a href="#booking" class="btn btn-gold w-full sm:w-auto justify-center">Check availability</a>
         <a href="#gallery" class="btn btn-ghost w-full sm:w-auto justify-center">Take a look inside</a>
       </div>
@@ -252,7 +273,7 @@
 </section>
 
 <!-- ===================== FACTS STRIP (overlaps hero bottom, fully visible) ===================== -->
-<div class="relative z-30 -mt-16 sm:-mt-20 px-5">
+<div class="relative z-30 -mt-16 sm:-mt-20 px-5 hero-anim" style="animation-name:heroRise;animation-delay:1.15s">
   <div class="max-w-4xl mx-auto bg-regal-ink shadow-float rounded-sm border-t-2 border-gold grid grid-cols-3 divide-x divide-white/15 overflow-hidden">
     <div class="px-3 sm:px-6 py-6 sm:py-7 text-center">
       <div class="font-serif text-gold text-3xl sm:text-4xl font-700 leading-none">350</div>
