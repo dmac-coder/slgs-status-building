@@ -159,9 +159,10 @@
       <!-- Bookings -->
       <div id="tab-bookings" class="tabpane hidden">
         <div class="card p-5 sm:p-6">
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
             <h2 class="text-regal text-lg font-700">Booking requests</h2>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              <input id="bookSearch" type="search" class="!w-auto text-sm" placeholder="Search name, email, phone…">
               <select id="bookFilter" class="!w-auto text-sm"><option value="">All</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="declined">Declined</option></select>
               <button id="refreshBookings" class="btn btn-ghost text-sm">Refresh</button>
             </div>
@@ -175,8 +176,11 @@
         <div class="card p-5 sm:p-6">
           <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
             <h2 class="text-regal text-lg font-700">Revenue &amp; bookings report</h2>
-            <div class="flex items-center gap-2">
-              <select id="repPeriod" class="!w-auto text-sm"><option value="all">All time</option><option value="year">This year</option><option value="month">This month</option></select>
+            <div class="flex items-center gap-2 flex-wrap">
+              <select id="repPeriod" class="!w-auto text-sm"><option value="all">All time</option><option value="year">This year</option><option value="month">This month</option><option value="custom">Custom range</option></select>
+              <input id="repFrom" type="date" class="!w-auto text-sm" title="From (event date)">
+              <span class="text-charcoal/40">–</span>
+              <input id="repTo" type="date" class="!w-auto text-sm" title="To (event date)">
               <button id="repExport" class="btn btn-ghost text-sm">Export CSV</button>
               <button id="repRefresh" class="btn btn-ghost text-sm">Refresh</button>
             </div>
@@ -375,8 +379,10 @@ function sName(k){ return (SESSIONS.find(s=>s.key===k)||{}).name||k; }
 
 async function renderBookings(){
   const wrap=$('bookingList'); wrap.innerHTML='<p class="text-sm text-charcoal/50">Loading…</p>';
-  const rows=await listBookings($('bookFilter').value);
-  if(!rows.length){ wrap.innerHTML='<p class="text-sm text-charcoal/55">No booking requests.</p>'; return; }
+  const all=await listBookings($('bookFilter').value);
+  const q=($('bookSearch').value||'').trim().toLowerCase();
+  const rows = q ? all.filter(b=>[b.name,b.email,b.phone,b.event_type,b.event_date].some(x=>(x||'').toLowerCase().includes(q))) : all;
+  if(!rows.length){ wrap.innerHTML=`<p class="text-sm text-charcoal/55">${q?'No bookings match your search.':'No booking requests.'}</p>`; return; }
   const pays = await allPaymentsGrouped();
   wrap.innerHTML='';
   rows.forEach(b=>{
@@ -515,6 +521,7 @@ async function renderAudit(){
 const money = n => CURRENCY + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
 let _repBookings = [], _repPayments = [], _repReserved = [];
 function inPeriod(rows, period){
+  if(period==='custom'){ const f=$('repFrom').value, t=$('repTo').value; return rows.filter(b=>(!f||b.event_date>=f)&&(!t||b.event_date<=t)); }
   if(period==='all') return rows;
   const now=new Date();
   return rows.filter(b=>{ const d=new Date(b.event_date+'T00:00:00');
@@ -653,8 +660,11 @@ $('calNext').addEventListener('click', ()=>{ if(calMode==='month') calAnchor.set
 // bookings controls
 $('refreshBookings').addEventListener('click', renderBookings);
 $('bookFilter').addEventListener('change', renderBookings);
+$('bookSearch').addEventListener('input', ()=>{ clearTimeout(window._bs); window._bs=setTimeout(renderBookings,250); });
 // report controls
 $('repPeriod').addEventListener('change', drawReport);
+$('repFrom').addEventListener('change', ()=>{ $('repPeriod').value='custom'; drawReport(); });
+$('repTo').addEventListener('change',   ()=>{ $('repPeriod').value='custom'; drawReport(); });
 $('repRefresh').addEventListener('click', renderReport);
 $('repExport').addEventListener('click', exportReportCSV);
 // audit
