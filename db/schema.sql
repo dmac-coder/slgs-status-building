@@ -329,3 +329,56 @@ drop policy if exists roletasks_read  on role_tasks;
 drop policy if exists roletasks_write on role_tasks;
 create policy roletasks_read  on role_tasks for select to authenticated using (public.is_staff());
 create policy roletasks_write on role_tasks for all    to authenticated using (public.is_admin()) with check (public.is_admin());
+
+-- =====================================================================
+-- Waiver / discount (with required reason)  (re-run safe)
+-- =====================================================================
+alter table bookings add column if not exists discount_amount numeric(12,2);
+alter table bookings add column if not exists discount_reason text;
+alter table bookings add column if not exists discount_by     text;
+alter table bookings add column if not exists discount_at     timestamptz;
+
+-- recompute paid total + status, now subtracting any waiver/discount from the amount due
+create or replace function public.recalc_booking_payment(bid bigint) returns void
+  language plpgsql security definer as $$
+declare paid numeric(12,2); due numeric(12,2); disc numeric(12,2); eff numeric(12,2); st text;
+begin
+  select coalesce(sum(amount),0) into paid from public.payments where booking_id = bid;
+  select amount_due, coalesce(discount_amount,0) into due, disc from public.bookings where id = bid;
+  eff := case when due is null then null else greatest(due - disc, 0) end;   -- net payable
+  if eff is not null and eff <= 0 then st := 'full';       -- fully waived
+  elsif paid <= 0 then st := 'unpaid';
+  elsif eff is not null and paid >= eff then st := 'full';
+  else st := 'part';
+  end if;
+  update public.bookings set amount_paid = paid, payment_status = st where id = bid;
+end; $$;
+
+create or replace function public.bookings_recalc_status() returns trigger
+  language plpgsql security definer as $$
+declare paid numeric(12,2); eff numeric(12,2);
+begin
+  if NEW.amount_due is distinct from OLD.amount_due or NEW.discount_amount is distinct from OLD.discount_amount then
+    select coalesce(sum(amount),0) into paid from public.payments where booking_id = NEW.id;
+    NEW.amount_paid := paid;
+    eff := case when NEW.amount_due is null then null else greatest(NEW.amount_due - coalesce(NEW.discount_amount,0), 0) end;
+    if eff is not null and eff <= 0 then NEW.payment_status := 'full';
+    elsif paid <= 0 then NEW.payment_status := 'unpaid';
+    elsif eff is not null and paid >= eff then NEW.payment_status := 'full';
+    else NEW.payment_status := 'part';
+    end if;
+  end if;
+  return NEW;
+end; $$;
+
+-- include waiver changes in the audit log
+create or replace function public.audit_bookings() returns trigger
+  language plpgsql security definer as $$
+begin
+  if NEW.status is distinct from OLD.status then perform public.audit('booking_status', NEW.name||' · '||NEW.status, NEW.id); end if;
+  if NEW.amount_due is distinct from OLD.amount_due then perform public.audit('amount_due', NEW.name||' · due '||coalesce(NEW.amount_due::text,'—'), NEW.id); end if;
+  if NEW.discount_amount is distinct from OLD.discount_amount then perform public.audit('waiver_set', NEW.name||' · waiver '||coalesce(NEW.discount_amount::text,'—')||coalesce(' — '||NEW.discount_reason,''), NEW.id); end if;
+  if NEW.security_deposit is distinct from OLD.security_deposit then perform public.audit('deposit_set', NEW.name||' · deposit '||coalesce(NEW.security_deposit::text,'—'), NEW.id); end if;
+  if NEW.refund_status is distinct from OLD.refund_status and NEW.refund_status='approved' then perform public.audit('refund_approved', NEW.name||' · deposit refund approved', NEW.id); end if;
+  return null;
+end; $$;

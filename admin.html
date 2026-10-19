@@ -291,6 +291,7 @@ async function patchBooking(id,fields){ const r=await api('/bookings?id=eq.'+id,
 async function allPaymentsGrouped(){ const r=await api('/payments?select=*&order=created_at.asc'); if(!r.ok) return {}; const g={}; (await r.json()).forEach(p=>{ (g[p.booking_id]=g[p.booking_id]||[]).push(p); }); return g; }
 async function addPayment(booking_id,amount,receipt_number){ const r=await api('/payments',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({booking_id,amount,receipt_number:receipt_number||null})}); return r.ok; }
 async function setDeposit(id,amount){ return (await api('/bookings?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({security_deposit:amount})})).ok; }
+async function setWaiver(id,amount,reason){ const fields=(amount==null)?{discount_amount:null,discount_reason:null,discount_by:null,discount_at:null}:{discount_amount:amount,discount_reason:reason,discount_by:currentUser.email,discount_at:new Date().toISOString()}; return (await api('/bookings?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(fields)})).ok; }
 async function approveRefund(id,comment){ return (await api('/bookings?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({refund_status:'approved',refund_comment:comment,refund_by:currentUser.email,refund_at:new Date().toISOString()})})).ok; }
 async function listAudit(){ const r=await api('/audit_log?select=*&order=created_at.desc&limit=200'); return r.ok?await r.json():[]; }
 async function listRoleTasks(){ const r=await api('/role_tasks?select=*'); return r.ok?await r.json():[]; }
@@ -401,13 +402,15 @@ async function renderBookings(){
     const el=document.createElement('div'); el.className='border rounded p-3'; el.style.borderColor='rgba(74,21,75,.14)';
     const guests=b.guests?` · ${b.guests} guests`:'';
     const canConfirm=canSessions(), canPay=canPayments();
-    const due=b.amount_due!=null?Number(b.amount_due):null, paid=Number(b.amount_paid)||0, bal=due!=null?Math.max(0,due-paid):null;
+    const due=b.amount_due!=null?Number(b.amount_due):null, paid=Number(b.amount_paid)||0;
+    const disc=Number(b.discount_amount)||0, netDue=due!=null?Math.max(0,due-disc):null, bal=netDue!=null?Math.max(0,netDue-paid):null;
     const list=(pays[b.id]||[]);
     const listHtml = list.length ? '<div class="mt-2 space-y-1">'+list.map(p=>`<div class="flex justify-between text-xs text-charcoal/70"><span>${fmtTs(p.created_at)}${p.receipt_number?' · '+p.receipt_number:''}</span><span>${money(p.amount)}</span></div>`).join('')+'</div>' : '';
     const summary = `<div class="flex flex-wrap gap-x-4 gap-y-1 text-sm mt-2">
         <span>Due: <strong>${due!=null?money(due):'—'}</strong></span>
+        ${disc>0?`<span>Waiver: <strong class="text-regal">-${money(disc)}</strong></span>`:''}
         <span>Paid: <strong>${money(paid)}</strong></span>
-        ${due!=null?`<span>Balance: <strong class="${bal>0?'text-regal':'text-green-700'}">${money(bal)}</strong></span>`:''}</div>`;
+        ${netDue!=null?`<span>Balance: <strong class="${bal>0?'text-regal':'text-green-700'}">${money(bal)}</strong></span>`:''}</div>`;
     const payBlock = canPay ? `
       <div class="mt-3 pt-3 border-t border-black/5">
         <div class="text-[.7rem] font-700 uppercase tracking-wide text-regal mb-2">Payments</div>
@@ -441,6 +444,17 @@ async function renderBookings(){
             <button class="btn btn-purple text-sm mt-2 approveRef">Approve deposit refund (${money(dep)})</button>
           </div>` : (b.refund_status==='approved' ? `<div class="text-xs text-charcoal/70 mt-2">Refund of ${money(dep)} approved${b.refund_by?' by '+b.refund_by:''}${b.refund_at?' · '+fmtTs(b.refund_at):''}${b.refund_comment?' — “'+b.refund_comment+'”':''}</div>`:'')}
       </div>` : (dep ? `<div class="mt-3 pt-3 border-t border-black/5 text-sm"><span class="text-[.7rem] font-700 uppercase tracking-wide text-regal">Deposit</span> ${money(dep)} · ${b.refund_status==='approved'?'Refunded':'Held'}</div>` : '');
+    const waivBlock = canPay ? `
+      <div class="mt-3 pt-3 border-t border-black/5">
+        <div class="text-[.7rem] font-700 uppercase tracking-wide text-regal mb-2">Waiver / discount</div>
+        <div class="flex flex-wrap items-end gap-2">
+          <div><label>Waiver amount</label><input class="pwaiv text-sm !w-32" type="number" step="0.01" value="${b.discount_amount??''}" placeholder="0.00"></div>
+          <div class="grow min-w-[12rem]"><label>Reason (required)</label><input class="pwreason text-sm" type="text" value="${(b.discount_reason||'').replace(/"/g,'&quot;')}" placeholder="Reason for the waiver / discount"></div>
+          <button class="btn btn-purple text-sm applyWaiver">Apply</button>
+          ${disc>0?`<button class="btn btn-ghost text-sm clearWaiver">Remove</button>`:''}
+        </div>
+        ${disc>0?`<div class="text-xs text-charcoal/70 mt-1">Waiver of ${money(disc)}${b.discount_reason?' — “'+b.discount_reason+'”':''}${b.discount_by?' · by '+b.discount_by:''}</div>`:''}
+      </div>` : (disc>0 ? `<div class="mt-2 text-xs text-charcoal/70">Waiver: ${money(disc)}${b.discount_reason?' — '+b.discount_reason:''}</div>` : '');
     el.innerHTML=`
       <div class="flex items-start justify-between gap-2">
         <div>
@@ -458,7 +472,7 @@ async function renderBookings(){
         <button class="btn btn-purple text-xs confirm" ${b.status==='confirmed'?'disabled':''}>Confirm &amp; reserve</button>
         <button class="btn btn-ghost text-xs decline" ${b.status==='declined'?'disabled':''}>Decline</button>
       </div>`:''}
-      ${payBlock}${depBlock}`;
+      ${payBlock}${waivBlock}${depBlock}`;
     if(canConfirm){
       el.querySelector('.confirm').addEventListener('click', async ev=>{ ev.currentTarget.disabled=true; await patchBooking(b.id,{status:'confirmed'}); await reserveSlot(b.event_date,b.session); renderBookings(); });
       el.querySelector('.decline').addEventListener('click', async ev=>{ ev.currentTarget.disabled=true; await patchBooking(b.id,{status:'declined'}); renderBookings(); });
@@ -470,6 +484,8 @@ async function renderBookings(){
       const pb=el.querySelector('.payBal'); if(pb) pb.addEventListener('click', ()=> doPay(bal));
       const sd=el.querySelector('.saveDep'); if(sd) sd.addEventListener('click', async ()=>{ const v=el.querySelector('.pdep').value; sd.disabled=true; const ok=await setDeposit(b.id, v===''?null:Number(v)); if(!ok) alert('Could not set deposit.'); renderBookings(); });
       const ar=el.querySelector('.approveRef'); if(ar) ar.addEventListener('click', async ()=>{ const c=el.querySelector('.rcomment').value.trim(); if(!c){ alert('Please enter a comment before approving the refund.'); return; } ar.disabled=true; const ok=await approveRefund(b.id,c); if(!ok) alert('Could not approve refund.'); renderBookings(); });
+      const aw=el.querySelector('.applyWaiver'); if(aw) aw.addEventListener('click', async ()=>{ const amt=Number(el.querySelector('.pwaiv').value); const rs=el.querySelector('.pwreason').value.trim(); if(!(amt>0)){ alert('Enter a waiver amount greater than 0.'); return; } if(!rs){ alert('Please enter a reason for the waiver.'); return; } aw.disabled=true; const ok=await setWaiver(b.id,amt,rs); if(!ok) alert('Could not apply waiver.'); renderBookings(); });
+      const cw=el.querySelector('.clearWaiver'); if(cw) cw.addEventListener('click', async ()=>{ cw.disabled=true; const ok=await setWaiver(b.id,null,null); if(!ok) alert('Could not remove waiver.'); renderBookings(); });
     }
     wrap.appendChild(el);
   });
@@ -559,7 +575,8 @@ function drawReport(){
   const rows = inPeriod(_repBookings, $('repPeriod').value);
   const revenue = rows.reduce((s,b)=>s+(Number(b.amount_paid)||0),0);
   const outstanding = rows.filter(b=>b.status!=='declined' && b.amount_due!=null)
-                          .reduce((s,b)=>s+Math.max(0, Number(b.amount_due)-(Number(b.amount_paid)||0)),0);
+                          .reduce((s,b)=>s+Math.max(0, Number(b.amount_due)-(Number(b.discount_amount)||0)-(Number(b.amount_paid)||0)),0);
+  const waivers = rows.reduce((s,b)=>s+(Number(b.discount_amount)||0),0);
   const pendingRefunds = rows.filter(b=>b.status!=='declined' && b.security_deposit && b.refund_status!=='approved')
                              .reduce((s,b)=>s+Number(b.security_deposit),0);
   const reservedCount = inPeriod(_repReserved, $('repPeriod').value).length;
@@ -587,6 +604,7 @@ function drawReport(){
      ${pr('Full payments', full.length, money(fullSum))}
      ${pr('Part payments', part.length, money(partSum))}
      ${pr('Unpaid (confirmed)', unpaidConf.length, '—')}
+     ${pr('Waivers / discounts', rows.filter(b=>b.discount_amount).length, money(waivers))}
      <div class="flex justify-between pt-2 border-t border-black/5 font-700 text-regal"><span>Total collected</span><span>${money(revenue)}</span></div>
    </div>`;
 
@@ -618,7 +636,7 @@ function drawReport(){
 }
 function exportReportCSV(){
   const rows = inPeriod(_repBookings, $('repPeriod').value);
-  const cols=['created_at','event_date','session','name','email','phone','event_type','guests','status','payment_status','amount_due','amount_paid'];
+  const cols=['created_at','event_date','session','name','email','phone','event_type','guests','status','payment_status','amount_due','discount_amount','discount_reason','amount_paid','security_deposit','refund_status'];
   const esc=v=>{ v=(v==null?'':String(v)); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
   const csv=[cols.join(',')].concat(rows.map(b=>cols.map(c=>esc(b[c])).join(','))).join('\n');
   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
