@@ -272,6 +272,7 @@ async function api(path, opts={}){
   const go = t => fetch(NEON_DATA_API + path, { ...opts, headers:{ ...(opts.headers||{}), Authorization:'Bearer '+t } });
   let r = await go(tok);
   if (r.status === 401) { tok = await getJWT(true); r = await go(tok); }
+  if (!r.ok) { window.__apiErr = 'HTTP '+r.status; try { const j = await r.clone().json(); window.__apiErr = (j.message||'')+(j.hint?(' — '+j.hint):'')+(j.details?(' ['+j.details+']'):'') || window.__apiErr; } catch {} }
   return r;
 }
 async function currentSession(){ try{ const r=await fetch(NEON_AUTH+'/get-session',{credentials:'include'}); if(!r.ok)return null; const s=await r.json(); return s&&s.user?s.user:null; }catch{ return null; } }
@@ -478,13 +479,13 @@ async function renderBookings(){
       el.querySelector('.decline').addEventListener('click', async ev=>{ ev.currentTarget.disabled=true; await patchBooking(b.id,{status:'declined'}); renderBookings(); });
     }
     if(canPay){
-      el.querySelector('.saveDue').addEventListener('click', async ev=>{ const v=el.querySelector('.pdue').value; ev.currentTarget.disabled=true; const ok=await patchBooking(b.id,{amount_due: v===''?null:Number(v)}); if(!ok) alert('Could not set amount due.'); renderBookings(); });
-      const doPay=async amt=>{ const rc=el.querySelector('.prcpt').value.trim(); if(!(amt>0)){ alert('Enter a payment amount greater than 0.'); return; } const ok=await addPayment(b.id,amt,rc); if(!ok) alert('Could not record payment.'); renderBookings(); };
+      el.querySelector('.saveDue').addEventListener('click', async ev=>{ const v=el.querySelector('.pdue').value; ev.currentTarget.disabled=true; const ok=await patchBooking(b.id,{amount_due: v===''?null:Number(v)}); if(!ok) alert('Could not set amount due: '+(window.__apiErr||'')); renderBookings(); });
+      const doPay=async amt=>{ const rc=el.querySelector('.prcpt').value.trim(); if(!(amt>0)){ alert('Enter a payment amount greater than 0.'); return; } const ok=await addPayment(b.id,amt,rc); if(!ok) alert('Could not record payment: '+(window.__apiErr||'')); renderBookings(); };
       el.querySelector('.recPay').addEventListener('click', ()=> doPay(Number(el.querySelector('.pamt').value)));
       const pb=el.querySelector('.payBal'); if(pb) pb.addEventListener('click', ()=> doPay(bal));
-      const sd=el.querySelector('.saveDep'); if(sd) sd.addEventListener('click', async ()=>{ const v=el.querySelector('.pdep').value; sd.disabled=true; const ok=await setDeposit(b.id, v===''?null:Number(v)); if(!ok) alert('Could not set deposit.'); renderBookings(); });
-      const ar=el.querySelector('.approveRef'); if(ar) ar.addEventListener('click', async ()=>{ const c=el.querySelector('.rcomment').value.trim(); if(!c){ alert('Please enter a comment before approving the refund.'); return; } ar.disabled=true; const ok=await approveRefund(b.id,c); if(!ok) alert('Could not approve refund.'); renderBookings(); });
-      const aw=el.querySelector('.applyWaiver'); if(aw) aw.addEventListener('click', async ()=>{ const amt=Number(el.querySelector('.pwaiv').value); const rs=el.querySelector('.pwreason').value.trim(); if(!(amt>0)){ alert('Enter a waiver amount greater than 0.'); return; } if(!rs){ alert('Please enter a reason for the waiver.'); return; } aw.disabled=true; const ok=await setWaiver(b.id,amt,rs); if(!ok) alert('Could not apply waiver.'); renderBookings(); });
+      const sd=el.querySelector('.saveDep'); if(sd) sd.addEventListener('click', async ()=>{ const v=el.querySelector('.pdep').value; sd.disabled=true; const ok=await setDeposit(b.id, v===''?null:Number(v)); if(!ok) alert('Could not set deposit: '+(window.__apiErr||'')); renderBookings(); });
+      const ar=el.querySelector('.approveRef'); if(ar) ar.addEventListener('click', async ()=>{ const c=el.querySelector('.rcomment').value.trim(); if(!c){ alert('Please enter a comment before approving the refund.'); return; } ar.disabled=true; const ok=await approveRefund(b.id,c); if(!ok) alert('Could not approve refund: '+(window.__apiErr||'')); renderBookings(); });
+      const aw=el.querySelector('.applyWaiver'); if(aw) aw.addEventListener('click', async ()=>{ const amt=Number(el.querySelector('.pwaiv').value); const rs=el.querySelector('.pwreason').value.trim(); if(!(amt>0)){ alert('Enter a waiver amount greater than 0.'); return; } if(!rs){ alert('Please enter a reason for the waiver.'); return; } aw.disabled=true; const ok=await setWaiver(b.id,amt,rs); if(!ok){ alert('Could not apply waiver: '+(window.__apiErr||'')); aw.disabled=false; return; } renderBookings(); });
       const cw=el.querySelector('.clearWaiver'); if(cw) cw.addEventListener('click', async ()=>{ cw.disabled=true; const ok=await setWaiver(b.id,null,null); if(!ok) alert('Could not remove waiver.'); renderBookings(); });
     }
     wrap.appendChild(el);
