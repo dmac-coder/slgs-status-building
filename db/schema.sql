@@ -382,3 +382,6 @@ begin
   if NEW.refund_status is distinct from OLD.refund_status and NEW.refund_status='approved' then perform public.audit('refund_approved', NEW.name||' · deposit refund approved', NEW.id); end if;
   return null;
 end; $$;
+
+-- who recorded each payment (staff email)
+alter table payments add column if not exists created_by text;

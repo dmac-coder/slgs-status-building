@@ -290,7 +290,7 @@ async function openSlot(dateStr,session){ const r=await api(`/availability?event
 async function listBookings(filter){ let q='/bookings?select=*&order=created_at.desc'; if(filter) q+=`&status=eq.${filter}`; const r=await api(q); return r.ok?await r.json():[]; }
 async function patchBooking(id,fields){ const r=await api('/bookings?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(fields)}); return r.ok; }
 async function allPaymentsGrouped(){ const r=await api('/payments?select=*&order=created_at.asc'); if(!r.ok) return {}; const g={}; (await r.json()).forEach(p=>{ (g[p.booking_id]=g[p.booking_id]||[]).push(p); }); return g; }
-async function addPayment(booking_id,amount,receipt_number){ const r=await api('/payments',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({booking_id,amount,receipt_number:receipt_number||null})}); return r.ok; }
+async function addPayment(booking_id,amount,receipt_number){ const r=await api('/payments',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({booking_id,amount,receipt_number:receipt_number||null,created_by:(currentUser&&currentUser.email)||null})}); return r.ok; }
 async function setDeposit(id,amount){ return (await api('/bookings?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({security_deposit:amount})})).ok; }
 async function setWaiver(id,amount,reason){ const fields=(amount==null)?{discount_amount:null,discount_reason:null,discount_by:null,discount_at:null}:{discount_amount:amount,discount_reason:reason,discount_by:currentUser.email,discount_at:new Date().toISOString()}; return (await api('/bookings?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(fields)})).ok; }
 async function approveRefund(id,comment){ return (await api('/bookings?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({refund_status:'approved',refund_comment:comment,refund_by:currentUser.email,refund_at:new Date().toISOString()})})).ok; }
@@ -406,7 +406,7 @@ async function renderBookings(){
     const due=b.amount_due!=null?Number(b.amount_due):null, paid=Number(b.amount_paid)||0;
     const disc=Number(b.discount_amount)||0, netDue=due!=null?Math.max(0,due-disc):null, bal=netDue!=null?Math.max(0,netDue-paid):null;
     const list=(pays[b.id]||[]);
-    const listHtml = list.length ? '<div class="mt-2 space-y-1">'+list.map(p=>`<div class="flex justify-between text-xs text-charcoal/70"><span>${fmtTs(p.created_at)}${p.receipt_number?' · '+p.receipt_number:''}</span><span>${money(p.amount)}</span></div>`).join('')+'</div>' : '';
+    const listHtml = list.length ? '<div class="mt-2 space-y-1">'+list.map(p=>`<div class="flex justify-between text-xs text-charcoal/70"><span>${fmtTs(p.created_at)}${p.receipt_number?' · '+p.receipt_number:''}${p.created_by?' · '+p.created_by:''}</span><span>${money(p.amount)}</span></div>`).join('')+'</div>' : '';
     const summary = `<div class="flex flex-wrap gap-x-4 gap-y-1 text-sm mt-2">
         <span>Due: <strong>${due!=null?money(due):'—'}</strong></span>
         ${disc>0?`<span>Waiver: <strong class="text-regal">-${money(disc)}</strong></span>`:''}
@@ -480,7 +480,7 @@ async function renderBookings(){
     }
     if(canPay){
       el.querySelector('.saveDue').addEventListener('click', async ev=>{ const v=el.querySelector('.pdue').value; ev.currentTarget.disabled=true; const ok=await patchBooking(b.id,{amount_due: v===''?null:Number(v)}); if(!ok) alert('Could not set amount due: '+(window.__apiErr||'')); renderBookings(); });
-      const doPay=async amt=>{ const rc=el.querySelector('.prcpt').value.trim(); if(!(amt>0)){ alert('Enter a payment amount greater than 0.'); return; } const ok=await addPayment(b.id,amt,rc); if(!ok) alert('Could not record payment: '+(window.__apiErr||'')); renderBookings(); };
+      const doPay=async amt=>{ const rc=el.querySelector('.prcpt').value.trim(); if(!(amt>0)){ alert('Enter a payment amount greater than 0.'); return; } if(!rc){ alert('Please enter a receipt number before recording the payment.'); el.querySelector('.prcpt').focus(); return; } const ok=await addPayment(b.id,amt,rc); if(!ok) alert('Could not record payment: '+(window.__apiErr||'')); renderBookings(); };
       el.querySelector('.recPay').addEventListener('click', ()=> doPay(Number(el.querySelector('.pamt').value)));
       const pb=el.querySelector('.payBal'); if(pb) pb.addEventListener('click', ()=> doPay(bal));
       const sd=el.querySelector('.saveDep'); if(sd) sd.addEventListener('click', async ()=>{ const v=el.querySelector('.pdep').value; sd.disabled=true; const ok=await setDeposit(b.id, v===''?null:Number(v)); if(!ok) alert('Could not set deposit: '+(window.__apiErr||'')); renderBookings(); });
@@ -631,8 +631,8 @@ function drawReport(){
   const periodIds=new Set(rows.map(b=>b.id));
   const recs=_repPayments.filter(p=>periodIds.has(p.booking_id));
   $('repReceipts').innerHTML = recs.length ? `<table class="w-full text-sm border-collapse">
-     <thead><tr class="text-left text-xs text-charcoal/55 border-b"><th class="py-2 pr-3">Receipt</th><th class="pr-3">Date paid</th><th class="pr-3">Name</th><th class="pr-3">Event date</th><th class="text-right">Amount</th></tr></thead>
-     <tbody>${recs.map(p=>{ const bk=bookMap[p.booking_id]||{}; return `<tr class="border-b border-black/5"><td class="py-2 pr-3">${p.receipt_number||'—'}</td><td class="pr-3">${fmtTs(p.created_at)}</td><td class="pr-3">${bk.name||''}</td><td class="pr-3">${bk.event_date?fmtDate(bk.event_date):''}</td><td class="text-right">${money(p.amount)}</td></tr>`; }).join('')}</tbody>
+     <thead><tr class="text-left text-xs text-charcoal/55 border-b"><th class="py-2 pr-3">Receipt</th><th class="pr-3">Date paid</th><th class="pr-3">Name</th><th class="pr-3">Event date</th><th class="pr-3">Recorded by</th><th class="text-right">Amount</th></tr></thead>
+     <tbody>${recs.map(p=>{ const bk=bookMap[p.booking_id]||{}; return `<tr class="border-b border-black/5"><td class="py-2 pr-3">${p.receipt_number||'—'}</td><td class="pr-3">${fmtTs(p.created_at)}</td><td class="pr-3">${bk.name||''}</td><td class="pr-3">${bk.event_date?fmtDate(bk.event_date):''}</td><td class="pr-3">${p.created_by||'—'}</td><td class="text-right">${money(p.amount)}</td></tr>`; }).join('')}</tbody>
    </table>` : '<p class="text-sm text-charcoal/50">No payments recorded yet.</p>';
 }
 function exportReportCSV(){
