@@ -101,6 +101,20 @@
         <p class="text-xs text-charcoal/55">Uses the email &amp; password above. After creating, you'll be shown your User ID and the next step.</p>
         <button id="signupBtn" type="submit" class="btn btn-gold w-full">Create account</button>
       </form>
+
+      <div class="mt-3">
+        <button id="showReset" class="text-regal underline decoration-gold/50 underline-offset-4">Forgot password?</button>
+        <div id="resetForm" class="hidden space-y-3 mt-3">
+          <div><label for="rsEmail">Email</label><input id="rsEmail" type="email" autocomplete="username" placeholder="your admin email"></div>
+          <button id="sendOtpBtn" type="button" class="btn btn-ghost w-full">Send reset code</button>
+          <div id="otpStep" class="hidden space-y-3 pt-2 border-t border-black/5">
+            <div><label for="rsOtp">6-digit code (from your email)</label><input id="rsOtp" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456"></div>
+            <div><label for="rsNew">New password</label><input id="rsNew" type="password" autocomplete="new-password" placeholder="at least 8 characters"></div>
+            <button id="resetBtn" type="button" class="btn btn-purple w-full">Reset password</button>
+          </div>
+          <p id="resetMsg" class="hidden text-sm rounded px-3 py-2"></p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -279,6 +293,8 @@ async function currentSession(){ try{ const r=await fetch(NEON_AUTH+'/get-sessio
 async function signIn(email,password){ const r=await fetch(NEON_AUTH+'/sign-in/email',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})}); if(!r.ok){let m='Sign-in failed';try{m=(await r.json()).message||m;}catch{} throw new Error(m);} return (await r.json()).user; }
 async function signUp(email,password,name){ const r=await fetch(NEON_AUTH+'/sign-up/email',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,name:name||email})}); if(!r.ok){let m='Sign-up failed';try{m=(await r.json()).message||m;}catch{} throw new Error(m);} return (await r.json()).user; }
 async function signOut(){ try{ await fetch(NEON_AUTH+'/sign-out',{method:'POST',credentials:'include'}); }catch{} jwt=null;jwtExp=0;currentUser=null;myRole=null; }
+async function sendResetOtp(email){ try{ const r=await fetch(NEON_AUTH+'/forget-password/email-otp',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})}); return r.ok; }catch{ return false; } }
+async function resetWithOtp(email,otp,password){ const r=await fetch(NEON_AUTH+'/email-otp/reset-password',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,otp,password})}); if(r.ok) return {ok:true}; let m='Could not reset password'; try{ m=(await r.json()).message||m; }catch{} return {ok:false,msg:m}; }
 async function loadRole(){ try{ const r=await api('/rpc/my_role',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}); myRole = r.ok ? await r.json() : null; }catch{ myRole=null; } return myRole; }
 
 /* ======================= Data ops ======================= */
@@ -662,6 +678,26 @@ $('loginForm').addEventListener('submit', async e=>{ e.preventDefault(); $('logi
   catch(err){ $('loginError').textContent=err.message; $('loginError').classList.remove('hidden'); }
   finally{ b.disabled=false; b.textContent='Sign in'; } });
 $('showSignup').addEventListener('click', ()=> $('signupForm').classList.toggle('hidden'));
+$('showReset').addEventListener('click', ()=> $('resetForm').classList.toggle('hidden'));
+$('sendOtpBtn').addEventListener('click', async ()=>{
+  const email=$('rsEmail').value.trim(); if(!email){ alert('Enter your email first.'); return; }
+  const b=$('sendOtpBtn'); b.disabled=true; b.textContent='Sending…';
+  await sendResetOtp(email);
+  $('otpStep').classList.remove('hidden');
+  const m=$('resetMsg'); m.classList.remove('hidden'); m.textContent='If that email is registered, a 6-digit code has been sent. Enter it below with your new password.'; m.className='text-sm rounded px-3 py-2 bg-tint text-charcoal/80';
+  b.disabled=false; b.textContent='Resend code';
+});
+$('resetBtn').addEventListener('click', async ()=>{
+  const email=$('rsEmail').value.trim(), otp=$('rsOtp').value.trim(), pw=$('rsNew').value;
+  if(!otp||!pw){ alert('Enter the code and a new password.'); return; }
+  if(pw.length<8){ alert('Password must be at least 8 characters.'); return; }
+  const b=$('resetBtn'); b.disabled=true; b.textContent='Resetting…';
+  const res=await resetWithOtp(email,otp,pw);
+  const m=$('resetMsg'); m.classList.remove('hidden');
+  if(res.ok){ m.textContent='Password reset. You can now sign in with your new password.'; m.className='text-sm rounded px-3 py-2 bg-green-50 text-green-800 border border-green-200'; $('otpStep').classList.add('hidden'); $('email').value=email; $('password').value=''; }
+  else { m.textContent=res.msg; m.className='text-sm rounded px-3 py-2 bg-red-50 text-red-700 border border-red-200'; }
+  b.disabled=false; b.textContent='Reset password';
+});
 $('signupForm').addEventListener('submit', async e=>{ e.preventDefault(); $('loginError').classList.add('hidden'); const b=$('signupBtn'); b.disabled=true; b.textContent='Creating…';
   try{ currentUser=await signUp($('email').value.trim(),$('password').value,$('suName').value.trim()); await enterDashboard(); }
   catch(err){ $('loginError').textContent=err.message; $('loginError').classList.remove('hidden'); }
